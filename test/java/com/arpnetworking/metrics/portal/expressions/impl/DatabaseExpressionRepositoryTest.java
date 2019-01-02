@@ -35,6 +35,8 @@ import play.test.WithApplication;
 
 import javax.persistence.PersistenceException;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -51,7 +53,7 @@ import static org.junit.Assert.assertTrue;
 public class DatabaseExpressionRepositoryTest extends WithApplication {
 
     @Before
-    public void setup() {
+    public void setUp() {
         exprRepo.open();
     }
 
@@ -349,6 +351,7 @@ public class DatabaseExpressionRepositoryTest extends WithApplication {
     protected Application provideApplication() {
         return new GuiceApplicationBuilder()
                 .loadConfig(ConfigFactory.load("portal.application.conf"))
+                .configure("play.modules.disabled", Arrays.asList("play.core.ObjectMapperModule", "global.PillarModule"))
                 .configure(AkkaClusteringConfigFactory.generateConfiguration())
                 .configure(H2ConnectionStringFactory.generateConfiguration())
                 .build();

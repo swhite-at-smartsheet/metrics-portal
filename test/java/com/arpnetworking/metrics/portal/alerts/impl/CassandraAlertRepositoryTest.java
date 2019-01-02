@@ -41,7 +41,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import play.Application;
-import play.inject.Injector;
 import play.inject.guice.GuiceApplicationBuilder;
 import play.test.WithApplication;
 
@@ -84,7 +83,7 @@ public class CassandraAlertRepositoryTest extends WithApplication {
 
 
     @Before
-    public void setup() {
+    public void setUp() {
         _mappingManager = instanceOf(MappingManager.class);
         _alertRepo = instanceOf(CassandraAlertRepository.class);
         _alertRepo.open();
