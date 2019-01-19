@@ -103,7 +103,7 @@ public class ExpressionController extends Controller {
     /**
      * Query for expressions.
      *
-     * * @param contains The text to search for. Optional.
+     * @param contains The text to search for. Optional.
      * @param cluster The cluster of the statistic to evaluate as part of the exression. Optional.
      * @param service The service of the statistic to evaluate as part of the expression. Optional.
      * @param limit The maximum number of results to return. Optional.

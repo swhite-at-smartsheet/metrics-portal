@@ -15,6 +15,10 @@
  */
 package com.arpnetworking.utility;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -25,32 +29,17 @@ import com.typesafe.config.ConfigValueFactory;
 import org.junit.Test;
 import play.Environment;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-
-interface TestInterface {}
-class TestClass implements TestInterface { }
-
-class InjectedClass {}
-class TestClassInjected implements TestInterface {
-    @Inject
-    public TestClassInjected(InjectedClass injected) {
-        _injected = injected;
-    }
-
-    InjectedClass getInjected() {
-        return _injected;
-    }
-
-    private InjectedClass _injected;
-}
-public class ConfigTypedProviderTest {
+/**
+ * Tests for {@link ConfigTypedProvider}.
+ *
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ */
+public final class ConfigTypedProviderTest {
 
     @Test
     public void createBasic() {
         final Config config = ConfigFactory.empty()
-                .withValue("testinterface.impl.class", ConfigValueFactory.fromAnyRef(TestClass.class.getCanonicalName()));
+                .withValue("testinterface.impl.class", ConfigValueFactory.fromAnyRef(TestClass.class.getName()));
 
         final AbstractModule module = new AbstractModule() {
             @Override
@@ -70,7 +59,7 @@ public class ConfigTypedProviderTest {
     @Test
     public void createWithInjected() {
         final Config config = ConfigFactory.empty()
-                .withValue("testinterface.impl.class", ConfigValueFactory.fromAnyRef(TestClassInjected.class.getCanonicalName()));
+                .withValue("testinterface.impl.class", ConfigValueFactory.fromAnyRef(TestClassInjected.class.getName()));
 
         final InjectedClass injectedClass = new InjectedClass();
         final AbstractModule module = new AbstractModule() {
@@ -89,6 +78,24 @@ public class ConfigTypedProviderTest {
         assertEquals(TestClassInjected.class, instance.getClass());
         final TestClassInjected testClassInjected = (TestClassInjected) instance;
         assertSame(injectedClass, testClassInjected.getInjected());
+    }
 
+    interface TestInterface {}
+
+    static final class TestClass implements TestInterface { }
+
+    static final class InjectedClass {}
+
+    static final class TestClassInjected implements TestInterface {
+        @Inject
+        TestClassInjected(final InjectedClass injected) {
+            _injected = injected;
+        }
+
+        InjectedClass getInjected() {
+            return _injected;
+        }
+
+        private final InjectedClass _injected;
     }
 }

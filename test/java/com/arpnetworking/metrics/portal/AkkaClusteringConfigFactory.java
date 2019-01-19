@@ -31,6 +31,7 @@ public final class AkkaClusteringConfigFactory {
     /**
      * Generates Akka config with a unique network port.
      *
+     * @return Akka configuration block.
      */
     public static Map<String, Object> generateConfiguration() {
         final int nextCounter = UNIQUE_COUNTER.getAndIncrement();
@@ -40,6 +41,8 @@ public final class AkkaClusteringConfigFactory {
                 "akka.remote.netty.tcp.hostname", "127.0.0.1",
                 "akka.remote.netty.tcp.port", port);
     }
+
+    private AkkaClusteringConfigFactory() {}
 
     private static final AtomicInteger UNIQUE_COUNTER = new AtomicInteger(1);
     private static final int BASE_PORT = 20000;

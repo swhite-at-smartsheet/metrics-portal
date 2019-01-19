@@ -15,6 +15,12 @@
  */
 package com.arpnetworking.metrics.portal.alerts.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
 import com.arpnetworking.metrics.portal.AkkaClusteringConfigFactory;
 import com.arpnetworking.metrics.portal.CassandraConnectionFactory;
 import com.arpnetworking.metrics.portal.H2ConnectionStringFactory;
@@ -48,12 +54,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Tests class <code>CassandraAlertRepository</code>.
@@ -99,7 +99,9 @@ public class CassandraAlertRepositoryTest extends WithApplication {
             try {
                 EmbeddedCassandraServerHelper.cleanEmbeddedCassandra();
                 break;
-            } catch (final Throwable e) {
+                // CHECKSTYLE.OFF: IllegalCatch - Retry any runtime exceptions
+            } catch (final RuntimeException e) {
+                // CHECKSTYLE.ON
                 if (x == maxTries) {
                     throw e;
                 }

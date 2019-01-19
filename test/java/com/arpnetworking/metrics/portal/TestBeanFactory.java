@@ -42,6 +42,7 @@ import java.util.UUID;
  *
  * @author Deepika Misra (deepika at groupon dot com)
  */
+// CHECKSTYLE.OFF: JavadocMethod - The documentation needs to be completed
 public final class TestBeanFactory {
 
     public static Organization organizationFrom(final models.ebean.Organization organization) {
@@ -184,6 +185,8 @@ public final class TestBeanFactory {
         return host;
     }
 
+    private TestBeanFactory() {}
+
     private static final String TEST_HOST = "test-host";
     private static final String TEST_CLUSTER = "test-cluster";
     private static final String TEST_METRIC = "test-metric";
@@ -205,3 +208,4 @@ public final class TestBeanFactory {
     private static final String TEST_NAGIOS_NOTIFY = "abc@example.com";
     private static final Random RANDOM = new Random();
 }
+// CHECKSTYLE.ON: JavadocMethod
