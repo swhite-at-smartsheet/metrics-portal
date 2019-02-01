@@ -90,7 +90,7 @@ public class CassandraAlertRepositoryTest extends WithApplication {
     }
 
     @After
-    public void teardown() {
+    public void tearDown() {
         if (_alertRepo != null) {
             _alertRepo.close();
         }

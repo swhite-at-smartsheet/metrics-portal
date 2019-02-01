@@ -61,7 +61,7 @@ public class DatabaseAlertRepositoryTest extends WithApplication {
     }
 
     @After
-    public void teardown() {
+    public void tearDown() {
         _alertRepo.close();
     }
 

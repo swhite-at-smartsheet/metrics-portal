@@ -41,14 +41,7 @@ public final class ConfigTypedProviderTest {
         final Config config = ConfigFactory.empty()
                 .withValue("testinterface.impl.class", ConfigValueFactory.fromAnyRef(TestClass.class.getName()));
 
-        final AbstractModule module = new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(Environment.class).toInstance(Environment.simple());
-                bind(TestInterface.class).toProvider(ConfigTypedProvider.provider("testinterface.impl.class"));
-                bind(Config.class).toInstance(config);
-            }
-        };
+        final AbstractModule module = new BasicModule(config);
 
         final Injector injector = Guice.createInjector(module);
         final TestInterface instance = injector.getInstance(TestInterface.class);
@@ -62,15 +55,7 @@ public final class ConfigTypedProviderTest {
                 .withValue("testinterface.impl.class", ConfigValueFactory.fromAnyRef(TestClassInjected.class.getName()));
 
         final InjectedClass injectedClass = new InjectedClass();
-        final AbstractModule module = new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(Environment.class).toInstance(Environment.simple());
-                bind(TestInterface.class).toProvider(ConfigTypedProvider.provider("testinterface.impl.class"));
-                bind(Config.class).toInstance(config);
-                bind(InjectedClass.class).toInstance(injectedClass);
-            }
-        };
+        final AbstractModule module = new InjectedModule(config, injectedClass);
 
         final Injector injector = Guice.createInjector(module);
         final TestInterface instance = injector.getInstance(TestInterface.class);
@@ -97,5 +82,38 @@ public final class ConfigTypedProviderTest {
         }
 
         private final InjectedClass _injected;
+    }
+
+    private static final class BasicModule extends AbstractModule {
+        private final Config _config;
+
+        BasicModule(final Config config) {
+            _config = config;
+        }
+
+        @Override
+        protected void configure() {
+            bind(Environment.class).toInstance(Environment.simple());
+            bind(TestInterface.class).toProvider(ConfigTypedProvider.provider("testinterface.impl.class"));
+            bind(Config.class).toInstance(_config);
+        }
+    }
+
+    private static final class InjectedModule extends AbstractModule {
+        private final Config _config;
+        private final InjectedClass _injectedClass;
+
+        InjectedModule(final Config config, final InjectedClass injectedClass) {
+            _config = config;
+            _injectedClass = injectedClass;
+        }
+
+        @Override
+        protected void configure() {
+            bind(Environment.class).toInstance(Environment.simple());
+            bind(TestInterface.class).toProvider(ConfigTypedProvider.provider("testinterface.impl.class"));
+            bind(Config.class).toInstance(_config);
+            bind(InjectedClass.class).toInstance(_injectedClass);
+        }
     }
 }

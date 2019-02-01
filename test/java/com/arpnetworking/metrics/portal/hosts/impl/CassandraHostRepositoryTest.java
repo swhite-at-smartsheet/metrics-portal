@@ -83,7 +83,7 @@ public final class CassandraHostRepositoryTest extends WithApplication {
     }
 
     @After
-    public void teardown() {
+    public void tearDown() {
         if (_hostRepo != null) {
             _hostRepo.close();
         }

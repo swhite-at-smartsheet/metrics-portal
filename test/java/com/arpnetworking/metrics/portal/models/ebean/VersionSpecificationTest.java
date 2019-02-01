@@ -110,19 +110,31 @@ public final class VersionSpecificationTest extends WithApplication {
 
     private Matcher<? super VersionSpecificationAttribute> hasKV(final String k, final String v) {
         final FeatureMatcher<VersionSpecificationAttribute, String> keyMatcher =
-                new FeatureMatcher<VersionSpecificationAttribute, String>(Matchers.equalTo(k), "key", "key") {
-            @Override
-            protected String featureValueOf(final VersionSpecificationAttribute versionSpecificationAttribute) {
-                return versionSpecificationAttribute.getKey();
-            }
-        };
+                new VersionSpecificationAttributeKeyMatcher(k);
         final FeatureMatcher<VersionSpecificationAttribute, String> valueMatcher =
-                new FeatureMatcher<VersionSpecificationAttribute, String>(Matchers.equalTo(v), "value", "value") {
-            @Override
-            protected String featureValueOf(final VersionSpecificationAttribute versionSpecificationAttribute) {
-                return versionSpecificationAttribute.getValue();
-            }
-        };
+                new VersionSpecificationAttributeValueMatcher(v);
         return Matchers.allOf(keyMatcher, valueMatcher);
+    }
+
+    private static final class VersionSpecificationAttributeKeyMatcher extends FeatureMatcher<VersionSpecificationAttribute, String> {
+        VersionSpecificationAttributeKeyMatcher(final String k) {
+            super(Matchers.equalTo(k), "key", "key");
+        }
+
+        @Override
+        protected String featureValueOf(final VersionSpecificationAttribute versionSpecificationAttribute) {
+            return versionSpecificationAttribute.getKey();
+        }
+    }
+
+    private static final class VersionSpecificationAttributeValueMatcher extends FeatureMatcher<VersionSpecificationAttribute, String> {
+        VersionSpecificationAttributeValueMatcher(final String v) {
+            super(Matchers.equalTo(v), "value", "value");
+        }
+
+        @Override
+        protected String featureValueOf(final VersionSpecificationAttribute versionSpecificationAttribute) {
+            return versionSpecificationAttribute.getValue();
+        }
     }
 }
