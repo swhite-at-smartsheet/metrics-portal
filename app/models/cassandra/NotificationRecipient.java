@@ -17,6 +17,7 @@ package models.cassandra;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import models.ebean.PagerDutyNotificationRecipient;
 import models.internal.NotificationEntry;
 import models.internal.impl.DefaultEmailNotificationEntry;
 import models.internal.impl.WebHookNotificationEntry;
@@ -29,7 +30,9 @@ import models.internal.impl.WebHookNotificationEntry;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "@type")
 @JsonSubTypes({
         @JsonSubTypes.Type(name = "email", value = EmailNotificationRecipient.class),
-        @JsonSubTypes.Type(name = "webhook", value = WebHookNotificationRecipient.class)})
+        @JsonSubTypes.Type(name = "webhook", value = WebHookNotificationRecipient.class),
+        @JsonSubTypes.Type(name = "pagerduty", value = PagerDutyNotificationRecipient.class),
+})
 public interface NotificationRecipient {
     /**
      * Converts this model to an internal model.

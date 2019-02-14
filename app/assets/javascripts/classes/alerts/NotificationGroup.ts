@@ -18,7 +18,8 @@ import ko = require('knockout');
 
 export enum RecipientType {
     EMAIL = "email",
-    WEBHOOK = "webhook"
+    WEBHOOK = "webhook",
+    PAGERDUTY = "pagerduty"
 }
 
 export abstract class Recipient {
@@ -51,6 +52,17 @@ export class WebHookRecipient extends Recipient {
     }
 }
 
+export class PagerDutyRecipient extends Recipient {
+    address: string;
+
+    constructor(obj?: any) {
+        super(RecipientType.PAGERDUTY);
+        if (obj !== undefined) {
+            this.address = obj.address;
+        }
+    }
+}
+
 export class NotificationGroup {
     id: string;
     name: string;
@@ -66,6 +78,8 @@ export class NotificationGroup {
                 return new EmailRecipient(recipient);
             } else if (recipient.type === "webhook") {
                 return new WebHookRecipient(recipient);
+            } else if (recipient.type === "pagerduty") {
+                return new PagerDutyRecipient(recipient);
             }})
             .forEach(recipient => this.entries.push(recipient));
 
