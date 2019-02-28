@@ -273,7 +273,7 @@ val main = (project in file(".")).enablePlugins(play.sbt.PlayJava, play.ebean.sb
     "-Xlint:-processing"
   ),
 
-  devSettings := Seq(("config.resource", "dev.conf"), "play.server.http.port" -> "8080"),
+  devSettings := Seq(("config.resource", "dev.conf"), "play.server.http.port" -> "8089"),
   javaOptions += "-Dconfig.file=conf/portal.application.conf",
   javaOptions in Test += "-Dlogger.resource=logback-test.xml",
 

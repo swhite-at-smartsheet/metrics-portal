@@ -37,14 +37,14 @@ import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 
 /**
- * Internal module representing a pagerduty notification entry.
+ * Internal modle representing a pagerduty notification entry.
  *
- * @author Sheldon White
+ * @author Brandon Arp (brandon dot arp at smartsheet dot com)
  */
 public final class PagerDutyNotificationEntry implements NotificationEntry {
     @Override
     public CompletionStage<Void> notifyRecipient(final Alert alert, final AlertTrigger trigger, final Injector injector) {
-        LOGGER.debug().setMessage("executing pagerduty call").log();
+        LOGGER.debug().setMessage("executing pagerduty call").addData("address", _address).log();
         final ActorSystem actorSystem = injector.getInstance(ActorSystem.class);
         final ObjectMapper mapper = injector.getInstance(ObjectMapper.class);
         final Http http = Http.get(actorSystem);
@@ -54,7 +54,7 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
 
         return http
                 .singleRequest(
-                        HttpRequest.POST("https://www.smartsheet.com") // FIXME: get from config
+                        HttpRequest.POST(_address.toASCIIString())
                                 .withEntity(HttpEntities.create(ContentTypes.APPLICATION_JSON, body.toString())))
                 .thenApply(response -> null);
     }
@@ -62,12 +62,13 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
     @Override
     public models.view.NotificationEntry toView() {
         final models.view.PagerDutyNotificationEntry view = new models.view.PagerDutyNotificationEntry();
+        view.setAddress(_address);
         return view;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this);
+        return Objects.hash(_address);
     }
 
     @Override
@@ -75,11 +76,22 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
         if (this == o) {
             return true;
         }
-        return (o == null || getClass() != o.getClass());
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final PagerDutyNotificationEntry other = (PagerDutyNotificationEntry) o;
+        return Objects.equals(_address, other._address);
+    }
+
+    public URI getAddress() {
+        return _address;
     }
 
     private PagerDutyNotificationEntry(final Builder builder) {
+        _address = builder._address;
     }
+
+    private final URI _address;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PagerDutyNotificationEntry.class);
 
@@ -95,5 +107,20 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
         public Builder() {
             super(PagerDutyNotificationEntry::new);
         }
+
+        /**
+         * The pagerduty address. Required. Cannot be null or empty.
+         *
+         * @param value The email address.
+         * @return This instance of {@link Builder}.
+         */
+        public Builder setAddress(final URI value) {
+            _address = value;
+            return this;
+        }
+
+        @NotNull
+        @NotEmpty
+        private URI _address;
     }
 }

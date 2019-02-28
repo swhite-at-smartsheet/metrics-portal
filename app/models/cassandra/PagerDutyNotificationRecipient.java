@@ -22,14 +22,23 @@ import java.net.URI;
 import java.util.Objects;
 
 /**
- * Model class for an pagerduty notification recipient in cassandra.
+ * Model class for an email notification recipient in cassandra.
  *
  * @author Brandon Arp (brandon dot arp at smartsheet dot com)
  */
 public class PagerDutyNotificationRecipient implements NotificationRecipient {
+    public URI getAddress() {
+        return _address;
+    }
+
+    public void setAddress(final URI address) {
+        _address = address;
+    }
+
     @Override
     public NotificationEntry toInternal() {
         return new PagerDutyNotificationEntry.Builder()
+                .setAddress(_address)
                 .build();
     }
 
@@ -38,11 +47,18 @@ public class PagerDutyNotificationRecipient implements NotificationRecipient {
         if (this == o) {
             return true;
         }
-        return (o == null || getClass() != o.getClass());
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final PagerDutyNotificationRecipient that = (PagerDutyNotificationRecipient) o;
+        return Objects.equals(_address, that._address);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this);
+
+        return Objects.hash(_address);
     }
+
+    private URI _address;
 }

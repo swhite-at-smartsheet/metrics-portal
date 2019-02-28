@@ -19,10 +19,10 @@ import com.google.common.base.Objects;
 import models.internal.NotificationEntry;
 import models.internal.impl.PagerDutyNotificationEntry;
 
+import java.net.URI;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import java.net.URI;
 
 /**
  * An email address to send mail to.
@@ -34,22 +34,36 @@ import java.net.URI;
 @DiscriminatorValue("pagerduty")
 public class PagerDutyNotificationRecipient extends NotificationRecipient {
     @Column(name = "value")
+    private URI address;
+    public URI getAddress() {
+        return address;
+    }
+
+    public void setAddress(final URI value) {
+        address = value;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-        return (o == null || getClass() != o.getClass());
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final PagerDutyNotificationRecipient that = (PagerDutyNotificationRecipient) o;
+        return Objects.equal(address, that.address);
     }
 
-//    @Override
-//    public int hashCode() {
-//        return Objects.hashCode(this);
-//    }
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(address);
+    }
 
     @Override
     public NotificationEntry toInternal() {
         return new PagerDutyNotificationEntry.Builder()
+                .setAddress(address)
                 .build();
     }
 

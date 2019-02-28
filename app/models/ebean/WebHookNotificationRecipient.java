@@ -66,5 +66,7 @@ public class WebHookNotificationRecipient extends NotificationRecipient {
                 .setAddress(address)
                 .build();
     }
+
+    private static final long serialVersionUID = 1L;
 }
 // CHECKSTYLE.ON: MemberNameCheck

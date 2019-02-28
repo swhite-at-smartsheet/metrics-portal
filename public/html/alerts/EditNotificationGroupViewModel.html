@@ -17,7 +17,7 @@
 <div class="container-fluid">
     <div class="row-fluid">
         <div class="col-md-12">
-            <h2>Edit A Notification Group</h2>
+            <h2>Edit Notification Group</h2>
             <div class="col-md-8 col-sm-12 col-lg-4">
                 <div>
                     <form role="form">
@@ -70,12 +70,12 @@
     </li>
 </script>
 <script type="text/html" id="template-add-recipient-pagerduty">
-    <label for="pagerdutyAddressInput">PagerDuty</label>
-    <input class="form-control" data-bind="value: addAddress" type="url" id="pagerdutyAddressInput" placeholder="URL">
+    <label for="pagerdutyId">ID</label>
+    <input class="form-control" data-bind="value: addAddress" type="url" id="pagerdutyId"  placeholder="ID">
 </script>
 <script type="text/html" id="template-recipient-pagerduty">
     <li>
-        <i class="fa fa-cloud" aria-hidden="true"></i> <span data-bind="text: address"></span>
+        <i class="fa fa-pager" aria-hidden="true"></i> <span data-bind="text: address"></span>
         <a href="#" data-bind="click: $root.removeRecipient.bind($root)"><i class="fa fa-trash-o"></i></a>
     </li>
 </script>

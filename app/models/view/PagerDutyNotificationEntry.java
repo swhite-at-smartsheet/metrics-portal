@@ -23,9 +23,20 @@ import java.net.URI;
  * @author Sheldon White
  */
 public class PagerDutyNotificationEntry extends NotificationEntry {
+    public URI getAddress() {
+        return _address;
+    }
+
+    public void setAddress(final URI address) {
+        _address = address;
+    }
+
+    private URI _address;
+
     @Override
     public models.internal.NotificationEntry toInternal() {
         return new models.internal.impl.PagerDutyNotificationEntry.Builder()
+                .setAddress(_address)
                 .build();
     }
 }

@@ -31,7 +31,7 @@ import models.internal.impl.PagerDutyNotificationEntry;
 @JsonSubTypes({
         @JsonSubTypes.Type(name = "email", value = EmailNotificationRecipient.class),
         @JsonSubTypes.Type(name = "webhook", value = WebHookNotificationRecipient.class),
-        @JsonSubTypes.Type(name = "pagerduty", value = PagerDutyNotificationRecipient.class),
+        @JsonSubTypes.Type(name = "pagerduty", value = PagerDutyNotificationRecipient.class)
 })
 public interface NotificationRecipient {
     /**
@@ -61,6 +61,7 @@ public interface NotificationRecipient {
         } else if (recipient instanceof PagerDutyNotificationEntry) {
             final PagerDutyNotificationEntry pagerDutyNotificationEntry = (PagerDutyNotificationEntry) recipient;
             final PagerDutyNotificationRecipient notificationRecipient = new PagerDutyNotificationRecipient();
+            notificationRecipient.setAddress(pagerDutyNotificationEntry.getAddress());
             return notificationRecipient;
         }
         throw new IllegalArgumentException("Unknown recipient type \"" + recipient.getClass().getCanonicalName() + "\"");
