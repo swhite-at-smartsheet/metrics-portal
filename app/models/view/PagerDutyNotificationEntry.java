@@ -18,25 +18,14 @@ package models.view;
 import java.net.URI;
 
 /**
- * Represents an email notification entry.
+ * Represents an pagerduty notification entry.
  *
- * @author Brandon Arp (brandon dot arp at smartsheet dot com)
+ * @author Sheldon White
  */
 public class PagerDutyNotificationEntry extends NotificationEntry {
-    public URI getAddress() {
-        return _address;
-    }
-
-    public void setAddress(final URI address) {
-        _address = address;
-    }
-
-    private URI _address;
-
     @Override
     public models.internal.NotificationEntry toInternal() {
         return new models.internal.impl.PagerDutyNotificationEntry.Builder()
-                .setAddress(_address)
                 .build();
     }
 }

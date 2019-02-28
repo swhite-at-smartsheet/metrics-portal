@@ -95,7 +95,6 @@ class EditNotificationGroupViewModel {
             recipient.address = this.addAddress();
         } else if (this.addType() === "pagerduty") {
             recipient = new PagerDutyRecipient();
-            recipient.address = this.addAddress();
         }
         let saveRecipient = () => {$.ajax({
             type: "PUT",

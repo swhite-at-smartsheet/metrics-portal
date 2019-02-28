@@ -17,10 +17,10 @@ package models.cassandra;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import models.ebean.PagerDutyNotificationRecipient;
 import models.internal.NotificationEntry;
 import models.internal.impl.DefaultEmailNotificationEntry;
 import models.internal.impl.WebHookNotificationEntry;
+import models.internal.impl.PagerDutyNotificationEntry;
 
 /**
  * Represents a notification recipient.  Polymorphic deserialization is handled by Jackson through a TypeCodec.
@@ -57,6 +57,10 @@ public interface NotificationRecipient {
             final WebHookNotificationEntry webHookNotificationEntry = (WebHookNotificationEntry) recipient;
             final WebHookNotificationRecipient notificationRecipient = new WebHookNotificationRecipient();
             notificationRecipient.setAddress(webHookNotificationEntry.getAddress());
+            return notificationRecipient;
+        } else if (recipient instanceof PagerDutyNotificationEntry) {
+            final PagerDutyNotificationEntry pagerDutyNotificationEntry = (PagerDutyNotificationEntry) recipient;
+            final PagerDutyNotificationRecipient notificationRecipient = new PagerDutyNotificationRecipient();
             return notificationRecipient;
         }
         throw new IllegalArgumentException("Unknown recipient type \"" + recipient.getClass().getCanonicalName() + "\"");

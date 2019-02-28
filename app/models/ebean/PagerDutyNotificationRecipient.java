@@ -34,37 +34,25 @@ import java.net.URI;
 @DiscriminatorValue("pagerduty")
 public class PagerDutyNotificationRecipient extends NotificationRecipient {
     @Column(name = "value")
-    private URI address;
-    public URI getAddress() {
-        return address;
-    }
-
-    public void setAddress(final URI value) {
-        address = value;
-    }
-
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final PagerDutyNotificationRecipient that = (PagerDutyNotificationRecipient) o;
-        return Objects.equal(address, that.address);
+        return (o == null || getClass() != o.getClass());
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(address);
-    }
+//    @Override
+//    public int hashCode() {
+//        return Objects.hashCode(this);
+//    }
 
     @Override
     public NotificationEntry toInternal() {
         return new PagerDutyNotificationEntry.Builder()
-                .setAddress(address)
                 .build();
     }
+
+    private static final long serialVersionUID = 1L;
 }
 // CHECKSTYLE.ON: MemberNameCheck
