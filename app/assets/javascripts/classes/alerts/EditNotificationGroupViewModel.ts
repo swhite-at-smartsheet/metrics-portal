@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {EmailRecipient, NotificationGroup, Recipient, WebHookRecipient} from './NotificationGroup';
+import {EmailRecipient, NotificationGroup, Recipient, WebHookRecipient, PagerDutyRecipient} from './NotificationGroup';
 import ko = require('knockout');
 import $ = require('jquery');
 import uuid = require('../Uuid');
@@ -92,6 +92,9 @@ class EditNotificationGroupViewModel {
             recipient.address = this.addAddress();
         } else if (this.addType() === "webhook") {
             recipient = new WebHookRecipient();
+            recipient.address = this.addAddress();
+        } else if (this.addType() === "pagerduty") {
+            recipient = new PagerDutyRecipient();
             recipient.address = this.addAddress();
         }
         let saveRecipient = () => {$.ajax({

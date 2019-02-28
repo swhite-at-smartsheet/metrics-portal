@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import models.internal.NotificationEntry;
 import models.internal.impl.DefaultEmailNotificationEntry;
 import models.internal.impl.WebHookNotificationEntry;
+import models.internal.impl.PagerDutyNotificationEntry;
 
 /**
  * Represents a notification recipient.  Polymorphic deserialization is handled by Jackson through a TypeCodec.
@@ -29,7 +30,9 @@ import models.internal.impl.WebHookNotificationEntry;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "@type")
 @JsonSubTypes({
         @JsonSubTypes.Type(name = "email", value = EmailNotificationRecipient.class),
-        @JsonSubTypes.Type(name = "webhook", value = WebHookNotificationRecipient.class)})
+        @JsonSubTypes.Type(name = "webhook", value = WebHookNotificationRecipient.class),
+        @JsonSubTypes.Type(name = "pagerduty", value = PagerDutyNotificationRecipient.class)
+})
 public interface NotificationRecipient {
     /**
      * Converts this model to an internal model.
@@ -54,6 +57,11 @@ public interface NotificationRecipient {
             final WebHookNotificationEntry webHookNotificationEntry = (WebHookNotificationEntry) recipient;
             final WebHookNotificationRecipient notificationRecipient = new WebHookNotificationRecipient();
             notificationRecipient.setAddress(webHookNotificationEntry.getAddress());
+            return notificationRecipient;
+        } else if (recipient instanceof PagerDutyNotificationEntry) {
+            final PagerDutyNotificationEntry pagerDutyNotificationEntry = (PagerDutyNotificationEntry) recipient;
+            final PagerDutyNotificationRecipient notificationRecipient = new PagerDutyNotificationRecipient();
+            notificationRecipient.setAddress(pagerDutyNotificationEntry.getAddress());
             return notificationRecipient;
         }
         throw new IllegalArgumentException("Unknown recipient type \"" + recipient.getClass().getCanonicalName() + "\"");

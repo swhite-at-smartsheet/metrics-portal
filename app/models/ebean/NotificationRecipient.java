@@ -18,6 +18,7 @@ package models.ebean;
 import models.internal.NotificationEntry;
 import models.internal.impl.DefaultEmailNotificationEntry;
 import models.internal.impl.WebHookNotificationEntry;
+import models.internal.impl.PagerDutyNotificationEntry;
 
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
@@ -58,6 +59,11 @@ public abstract class NotificationRecipient {
             final WebHookNotificationEntry webHookNotificationEntry = (WebHookNotificationEntry) recipient;
             final WebHookNotificationRecipient notificationRecipient = new WebHookNotificationRecipient();
             notificationRecipient.setAddress(webHookNotificationEntry.getAddress());
+            return notificationRecipient;
+        } else if (recipient instanceof PagerDutyNotificationEntry) {
+            final PagerDutyNotificationEntry pagerDutyNotificationEntry = (PagerDutyNotificationEntry) recipient;
+            final PagerDutyNotificationRecipient notificationRecipient = new PagerDutyNotificationRecipient();
+            notificationRecipient.setAddress(pagerDutyNotificationEntry.getAddress());
             return notificationRecipient;
         }
         throw new IllegalArgumentException("Unknown recipient type \"" + recipient.getClass().getCanonicalName() + "\"");
