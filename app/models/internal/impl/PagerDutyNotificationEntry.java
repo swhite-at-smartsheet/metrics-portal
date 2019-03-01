@@ -27,12 +27,14 @@ import com.arpnetworking.steno.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Injector;
+import com.typesafe.config.Config;
 import models.internal.Alert;
 import models.internal.NotificationEntry;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 
@@ -45,18 +47,30 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
     @Override
     public CompletionStage<Void> notifyRecipient(final Alert alert, final AlertTrigger trigger, final Injector injector) {
         LOGGER.debug().setMessage("executing pagerduty call").addData("address", _address).log();
-        final ActorSystem actorSystem = injector.getInstance(ActorSystem.class);
-        final ObjectMapper mapper = injector.getInstance(ObjectMapper.class);
-        final Http http = Http.get(actorSystem);
-        final ObjectNode body = mapper.createObjectNode();
-        body.set("alert", mapper.valueToTree(alert));
-        body.set("trigger", mapper.valueToTree(trigger));
+        final Config typesafeConfig = injector.getInstance(Config.class);
+        String pagerDutyEndpoint = typesafeConfig.getString("pagerDuty.uri");
+        String pagerDutyServiceKey = typesafeConfig.getString("pagerDuty.serviceKey");
 
-        return http
-                .singleRequest(
-                        HttpRequest.POST(_address.toASCIIString())
-                                .withEntity(HttpEntities.create(ContentTypes.APPLICATION_JSON, body.toString())))
-                .thenApply(response -> null);
+        try {
+            URI pagerDutyURI = new URI(pagerDutyEndpoint);
+
+            final ActorSystem actorSystem = injector.getInstance(ActorSystem.class);
+            final ObjectMapper mapper = injector.getInstance(ObjectMapper.class);
+            final Http http = Http.get(actorSystem);
+            final ObjectNode body = mapper.createObjectNode();
+            body.put("service_key", pagerDutyServiceKey);
+            body.put("event_type", "trigger");
+            body.set("alert", mapper.valueToTree(alert));
+            body.set("trigger", mapper.valueToTree(trigger));
+
+            return http
+                    .singleRequest(
+                            HttpRequest.POST(pagerDutyURI.toASCIIString())
+                                    .withEntity(HttpEntities.create(ContentTypes.APPLICATION_JSON, body.toString())))
+                    .thenApply(response -> null);
+        } catch (URISyntaxException e) {
+            LOGGER.error("invalid pagerduty url syntax: " + pagerDutyEndpoint);
+        }
     }
 
     @Override
@@ -79,8 +93,7 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final PagerDutyNotificationEntry other = (PagerDutyNotificationEntry) o;
-        return Objects.equals(_address, other._address);
+        return true; // only allow a single instance
     }
 
     public URI getAddress() {

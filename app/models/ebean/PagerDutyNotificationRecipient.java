@@ -57,7 +57,7 @@ public class PagerDutyNotificationRecipient extends NotificationRecipient {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(address);
+        return Objects.hashCode("pd://pagerduty");
     }
 
     @Override
