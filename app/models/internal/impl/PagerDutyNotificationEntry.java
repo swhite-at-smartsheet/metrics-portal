@@ -71,6 +71,7 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
         } catch (URISyntaxException e) {
             LOGGER.error("invalid pagerduty url syntax: " + pagerDutyEndpoint);
         }
+        return null;
     }
 
     @Override
