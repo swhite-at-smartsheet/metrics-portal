@@ -23,15 +23,15 @@ import java.net.URI;
  * @author Sheldon White
  */
 public class PagerDutyNotificationEntry extends NotificationEntry {
-    public URI getAddress() {
+    public String getAddress() {
         return _address;
     }
 
-    public void setAddress(final URI address) {
+    public void setAddress(final String address) {
         _address = address;
     }
 
-    private URI _address;
+    private String _address;
 
     @Override
     public models.internal.NotificationEntry toInternal() {

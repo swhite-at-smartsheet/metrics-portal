@@ -34,12 +34,12 @@ import javax.persistence.Entity;
 @DiscriminatorValue("pagerduty")
 public class PagerDutyNotificationRecipient extends NotificationRecipient {
     @Column(name = "value")
-    private URI address;
-    public URI getAddress() {
+    private String address;
+    public String getAddress() {
         return address;
     }
 
-    public void setAddress(final URI value) {
+    public void setAddress(final String value) {
         address = value;
     }
 

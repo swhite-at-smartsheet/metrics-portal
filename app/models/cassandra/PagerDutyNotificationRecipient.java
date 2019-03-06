@@ -27,11 +27,11 @@ import java.util.Objects;
  * @author Brandon Arp (brandon dot arp at smartsheet dot com)
  */
 public class PagerDutyNotificationRecipient implements NotificationRecipient {
-    public URI getAddress() {
+    public String getAddress() {
         return _address;
     }
 
-    public void setAddress(final URI address) {
+    public void setAddress(final String address) {
         _address = address;
     }
 
@@ -60,5 +60,5 @@ public class PagerDutyNotificationRecipient implements NotificationRecipient {
         return Objects.hash(_address);
     }
 
-    private URI _address;
+    private String _address;
 }

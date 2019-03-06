@@ -97,7 +97,7 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
         return true; // only allow a single instance
     }
 
-    public URI getAddress() {
+    public String getAddress() {
         return _address;
     }
 
@@ -105,7 +105,7 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
         _address = builder._address;
     }
 
-    private final URI _address;
+    private final String _address;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PagerDutyNotificationEntry.class);
 
@@ -128,13 +128,13 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
          * @param value The email address.
          * @return This instance of {@link Builder}.
          */
-        public Builder setAddress(final URI value) {
+        public Builder setAddress(final String value) {
             _address = value;
             return this;
         }
 
         @NotNull
         @NotEmpty
-        private URI _address;
+        private String _address;
     }
 }
