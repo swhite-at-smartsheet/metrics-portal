@@ -39,7 +39,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 
 /**
- * Internal modle representing a pagerduty notification entry.
+ * Internal model representing a pagerduty notification entry.
  *
  * @author Brandon Arp (brandon dot arp at smartsheet dot com)
  */
@@ -60,6 +60,7 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
             final ObjectNode body = mapper.createObjectNode();
             body.put("service_key", pagerDutyServiceKey);
             body.put("event_type", "trigger");
+            body.put("description", _address);
             body.set("alert", mapper.valueToTree(alert));
             body.set("trigger", mapper.valueToTree(trigger));
 
@@ -68,8 +69,8 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
                             HttpRequest.POST(pagerDutyURI.toASCIIString())
                                     .withEntity(HttpEntities.create(ContentTypes.APPLICATION_JSON, body.toString())))
                     .thenApply(response -> null);
-        } catch (URISyntaxException e) {
-            LOGGER.error("invalid pagerduty url syntax: " + pagerDutyEndpoint);
+        } catch (Exception e) {
+            LOGGER.error("notifyException() exception: " + e);
         }
         return null;
     }
