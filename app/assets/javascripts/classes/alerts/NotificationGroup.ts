@@ -53,13 +53,8 @@ export class WebHookRecipient extends Recipient {
 }
 
 export class PagerDutyRecipient extends Recipient {
-    address: string;
-
-    constructor(obj?: any) {
+    constructor() {
         super(RecipientType.PAGERDUTY);
-        if (obj !== undefined) {
-            this.address = obj.address;
-        }
     }
 }
 
@@ -79,7 +74,7 @@ export class NotificationGroup {
             } else if (recipient.type === "webhook") {
                 return new WebHookRecipient(recipient);
             } else if (recipient.type === "pagerduty") {
-                return new PagerDutyRecipient(recipient);
+                return new PagerDutyRecipient();
             }
 
         }).forEach(recipient => this.entries.push(recipient));
@@ -88,5 +83,4 @@ export class NotificationGroup {
             return "#notificationgroup/edit/" + this.id;
         });
     }
-
 }

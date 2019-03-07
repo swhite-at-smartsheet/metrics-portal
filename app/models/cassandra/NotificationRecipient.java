@@ -59,9 +59,7 @@ public interface NotificationRecipient {
             notificationRecipient.setAddress(webHookNotificationEntry.getAddress());
             return notificationRecipient;
         } else if (recipient instanceof PagerDutyNotificationEntry) {
-            final PagerDutyNotificationEntry pagerDutyNotificationEntry = (PagerDutyNotificationEntry) recipient;
             final PagerDutyNotificationRecipient notificationRecipient = new PagerDutyNotificationRecipient();
-            notificationRecipient.setAddress(pagerDutyNotificationEntry.getAddress());
             return notificationRecipient;
         }
         throw new IllegalArgumentException("Unknown recipient type \"" + recipient.getClass().getCanonicalName() + "\"");

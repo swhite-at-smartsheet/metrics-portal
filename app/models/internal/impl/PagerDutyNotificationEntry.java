@@ -81,13 +81,12 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
     @Override
     public models.view.NotificationEntry toView() {
         final models.view.PagerDutyNotificationEntry view = new models.view.PagerDutyNotificationEntry();
-        view.setAddress(_address);
         return view;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_address);
+        return Objects.hashCode("pagerduty");
     }
 
     @Override

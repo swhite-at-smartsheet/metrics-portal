@@ -21,20 +21,10 @@ package models.view;
  * @author Sheldon White (sheldon.white at smartsheet dot com)
  */
 public class PagerDutyNotificationEntry extends NotificationEntry {
-    public String getAddress() {
-        return _address;
-    }
-
-    public void setAddress(final String address) {
-        _address = address;
-    }
-
-    private String _address;
 
     @Override
     public models.internal.NotificationEntry toInternal() {
         return new models.internal.impl.PagerDutyNotificationEntry.Builder()
-                .setAddress(_address)
                 .build();
     }
 }

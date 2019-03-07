@@ -33,36 +33,26 @@ import javax.persistence.Entity;
 @DiscriminatorValue("pagerduty")
 public class PagerDutyNotificationRecipient extends NotificationRecipient {
     @Column(name = "value")
-    private String address;
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(final String value) {
-        address = value;
-    }
+    private String label = "pagerduty";
 
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final PagerDutyNotificationRecipient that = (PagerDutyNotificationRecipient) o;
-        return Objects.equal(address, that.address);
+        // only allow a single instance
+        return o != null && getClass() == o.getClass();
     }
+
 
     @Override
     public int hashCode() {
-        return Objects.hashCode("pd://pagerduty");
+        return Objects.hashCode("pagerduty");
     }
 
     @Override
     public NotificationEntry toInternal() {
         return new PagerDutyNotificationEntry.Builder()
-                .setAddress(address)
                 .build();
     }
 
