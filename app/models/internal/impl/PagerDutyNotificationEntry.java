@@ -34,7 +34,6 @@ import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 
@@ -60,7 +59,8 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
             final ObjectNode body = mapper.createObjectNode();
             body.put("service_key", pagerDutyServiceKey);
             body.put("event_type", "trigger");
-            body.put("description", _address);
+            body.put("client", "mportal");
+            body.put("description", alert.getName());
             body.set("alert", mapper.valueToTree(alert));
             body.set("trigger", mapper.valueToTree(trigger));
 
@@ -68,7 +68,12 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
                     .singleRequest(
                             HttpRequest.POST(pagerDutyURI.toASCIIString())
                                     .withEntity(HttpEntities.create(ContentTypes.APPLICATION_JSON, body.toString())))
-                    .thenApply(response -> null);
+                    .thenApply(response -> {
+                        if (response.status().isFailure()) {
+                            LOGGER.error("Error posting to pagerduty: " + response.toString());
+                        }
+                        return null;
+                    });
         } catch (Exception e) {
             LOGGER.error("notifyException() exception: " + e);
         }
@@ -92,10 +97,8 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        return true; // only allow a single instance
+        // only allow a single instance
+        return o != null && getClass() == o.getClass();
     }
 
     public String getAddress() {
