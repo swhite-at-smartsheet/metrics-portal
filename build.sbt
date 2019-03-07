@@ -101,7 +101,7 @@ val appDependencies = Seq(
 
   "org.webjars" % "durandal" % "2.2.0",
   "org.webjars" % "flotr2" % "d43f8566e8",
-  "org.webjars" % "font-awesome" % "4.3.0-2",
+  "org.webjars" % "font-awesome" % "5.7.2",
   "org.webjars" % "jQRangeSlider" % "5.7.0",
   "org.webjars" % "jquery" % "3.2.1",
   "org.webjars" % "jquery-ui" % "1.12.1",
@@ -112,7 +112,6 @@ val appDependencies = Seq(
   "org.webjars" % "underscorejs" % "1.8.3",
   "org.webjars.npm" % "moment" % "2.20.1",
   "org.webjars.npm" % "github-com-auth0-jwt-decode" % "2.1.0",
-
   "org.cassandraunit" % "cassandra-unit" % "3.1.3.2" % "test",
   "junit" % "junit" % "4.12" % "test",
   "org.mockito" % "mockito-core" % "1.10.19" % "test"
