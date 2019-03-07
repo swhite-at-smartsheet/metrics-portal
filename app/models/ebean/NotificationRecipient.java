@@ -61,8 +61,7 @@ public abstract class NotificationRecipient {
             notificationRecipient.setAddress(webHookNotificationEntry.getAddress());
             return notificationRecipient;
         } else if (recipient instanceof PagerDutyNotificationEntry) {
-            final PagerDutyNotificationRecipient notificationRecipient = new PagerDutyNotificationRecipient();
-            return notificationRecipient;
+            return new PagerDutyNotificationRecipient();
         }
         throw new IllegalArgumentException("Unknown recipient type \"" + recipient.getClass().getCanonicalName() + "\"");
     }

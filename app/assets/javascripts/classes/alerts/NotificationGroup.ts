@@ -76,7 +76,6 @@ export class NotificationGroup {
             } else if (recipient.type === "pagerduty") {
                 return new PagerDutyRecipient();
             }
-
         }).forEach(recipient => this.entries.push(recipient));
 
         this.editUri = ko.computed<string>(() => {
