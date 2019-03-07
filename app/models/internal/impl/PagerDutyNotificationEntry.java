@@ -43,7 +43,7 @@ import java.util.concurrent.CompletionStage;
 public final class PagerDutyNotificationEntry implements NotificationEntry {
     @Override
     public CompletionStage<Void> notifyRecipient(final Alert alert, final AlertTrigger trigger, final Injector injector) {
-        LOGGER.debug().setMessage("executing pagerduty call").addData("address", _address).log();
+        LOGGER.debug().setMessage("executing pagerduty call").log();
         final Config typesafeConfig = injector.getInstance(Config.class);
         String pagerDutyEndpoint = typesafeConfig.getString("pagerDuty.uri");
         String pagerDutyServiceKey = typesafeConfig.getString("pagerDuty.serviceKey");
@@ -80,8 +80,7 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
 
     @Override
     public models.view.NotificationEntry toView() {
-        final models.view.PagerDutyNotificationEntry view = new models.view.PagerDutyNotificationEntry();
-        return view;
+        return new models.view.PagerDutyNotificationEntry();
     }
 
     @Override
@@ -98,15 +97,8 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
         return o != null && getClass() == o.getClass();
     }
 
-    public String getAddress() {
-        return _address;
-    }
-
     private PagerDutyNotificationEntry(final Builder builder) {
-        _address = builder._address;
     }
-
-    private final String _address;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PagerDutyNotificationEntry.class);
 
@@ -122,18 +114,5 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
         public Builder() {
             super(PagerDutyNotificationEntry::new);
         }
-
-        /**
-         * The pagerduty address. Required. Cannot be null or empty.
-         *
-         * @param value The email address.
-         * @return This instance of {@link Builder}.
-         */
-        public Builder setAddress(final String value) {
-            _address = value;
-            return this;
-        }
-
-        private String _address;
     }
 }
