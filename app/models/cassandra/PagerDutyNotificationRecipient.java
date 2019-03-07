@@ -18,13 +18,12 @@ package models.cassandra;
 import models.internal.NotificationEntry;
 import models.internal.impl.PagerDutyNotificationEntry;
 
-import java.net.URI;
 import java.util.Objects;
 
 /**
- * Model class for an email notification recipient in cassandra.
+ * Model class for a pagerduty notification recipient in cassandra.
  *
- * @author Brandon Arp (brandon dot arp at smartsheet dot com)
+ * @author Sheldon White (sheldon.white at smartsheet dot com)
  */
 public class PagerDutyNotificationRecipient implements NotificationRecipient {
     public String getAddress() {

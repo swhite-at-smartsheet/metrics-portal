@@ -19,15 +19,14 @@ import com.google.common.base.Objects;
 import models.internal.NotificationEntry;
 import models.internal.impl.PagerDutyNotificationEntry;
 
-import java.net.URI;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 /**
- * An email address to send mail to.
+ * Model class for a pagerduty notification recipient.
  *
- * @author Brandon Arp (brandon dot arp at smartsheet dot com)
+ * @author Sheldon White (sheldon.white at smartsheet dot com)
  */
 // CHECKSTYLE.OFF: MemberNameCheck
 @Entity

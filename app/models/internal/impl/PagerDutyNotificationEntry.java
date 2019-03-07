@@ -30,8 +30,6 @@ import com.google.inject.Injector;
 import com.typesafe.config.Config;
 import models.internal.Alert;
 import models.internal.NotificationEntry;
-import net.sf.oval.constraint.NotEmpty;
-import net.sf.oval.constraint.NotNull;
 
 import java.net.URI;
 import java.util.Objects;
@@ -40,7 +38,7 @@ import java.util.concurrent.CompletionStage;
 /**
  * Internal model representing a pagerduty notification entry.
  *
- * @author Brandon Arp (brandon dot arp at smartsheet dot com)
+ * @author Sheldon White (sheldon.white at smartsheet dot com)
  */
 public final class PagerDutyNotificationEntry implements NotificationEntry {
     @Override
@@ -137,8 +135,6 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
             return this;
         }
 
-        @NotNull
-        @NotEmpty
         private String _address;
     }
 }

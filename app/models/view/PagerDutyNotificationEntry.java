@@ -15,12 +15,10 @@
  */
 package models.view;
 
-import java.net.URI;
-
 /**
  * Represents an pagerduty notification entry.
  *
- * @author Sheldon White
+ * @author Sheldon White (sheldon.white at smartsheet dot com)
  */
 public class PagerDutyNotificationEntry extends NotificationEntry {
     public String getAddress() {
