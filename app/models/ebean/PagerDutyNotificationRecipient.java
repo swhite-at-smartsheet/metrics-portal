@@ -15,16 +15,17 @@
  */
 package models.ebean;
 
-import com.google.common.base.Objects;
 import models.internal.NotificationEntry;
 import models.internal.impl.PagerDutyNotificationEntry;
 
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import java.util.Objects;
 
 /**
  * Model class for a pagerduty notification recipient.
+ * These do not have any internal state and act as singletons when creating a NotificationGroup.
  *
  * @author Sheldon White (sheldon.white at smartsheet dot com)
  */
@@ -33,7 +34,7 @@ import javax.persistence.Entity;
 @DiscriminatorValue("pagerduty")
 public class PagerDutyNotificationRecipient extends NotificationRecipient {
     @Column(name = "value")
-    private String label = "pagerduty";
+    private String label = "pagerduty"; // it seems like there needs to be at least one data member for persistence to work.
 
     @Override
     public boolean equals(final Object o) {
@@ -47,7 +48,7 @@ public class PagerDutyNotificationRecipient extends NotificationRecipient {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode("pagerduty");
+        return Objects.hashCode(getClass()); // act like a singleton
     }
 
     @Override
@@ -56,6 +57,7 @@ public class PagerDutyNotificationRecipient extends NotificationRecipient {
                 .build();
     }
 
+    @SuppressWarnings("unused")
     private static final long serialVersionUID = 1L;
 }
 // CHECKSTYLE.ON: MemberNameCheck

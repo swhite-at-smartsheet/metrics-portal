@@ -34,9 +34,11 @@ import models.internal.NotificationEntry;
 import java.net.URI;
 import java.util.Objects;
 import java.util.concurrent.CompletionStage;
+import java.util.stream.Collectors;
 
 /**
  * Internal model representing a pagerduty notification entry.
+ * These do not have any internal state and act as singletons when creating a NotificationGroup.
  *
  * @author Sheldon White (sheldon.white at smartsheet dot com)
  */
@@ -55,12 +57,23 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
             final ObjectMapper mapper = injector.getInstance(ObjectMapper.class);
             final Http http = Http.get(actorSystem);
             final ObjectNode body = mapper.createObjectNode();
+            final String subject = String.format("Alert '%s' on %s in alarm ", alert.getName(), getGroupByString(trigger));
+            final String baseUrl = typesafeConfig.getString("alerts.baseUrl");
+            final String alertUrl = URI.create(baseUrl).resolve("/#alert/edit/" + alert.getId()).toString();
+
             body.put("service_key", pagerDutyServiceKey);
             body.put("event_type", "trigger");
-            body.put("client", "mportal");
-            body.put("description", alert.getName());
+            body.put("description", subject);
             body.set("alert", mapper.valueToTree(alert));
             body.set("trigger", mapper.valueToTree(trigger));
+            body.put("alertUrl", alertUrl);
+            PagerDutyContext[] contexts = new PagerDutyContext[1];
+            PagerDutyContext context = new PagerDutyContext();
+            context.href = alertUrl;
+            context.type = "link";
+            context.text = "View the alert in M-Portal";
+            contexts[0] = context;
+            body.set("contexts", mapper.valueToTree(contexts));
 
             return http
                     .singleRequest(
@@ -85,7 +98,7 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode("pagerduty");
+        return Objects.hashCode(getClass()); // act like a singleton
     }
 
     @Override
@@ -100,12 +113,20 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
     private PagerDutyNotificationEntry(final Builder builder) {
     }
 
+    private String getGroupByString(final AlertTrigger trigger) {
+        return trigger.getGroupBy()
+                .entrySet()
+                .stream()
+                .map(entry -> String.format("%s %s", entry.getKey(), entry.getValue()))
+                .collect(Collectors.joining(", "));
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(PagerDutyNotificationEntry.class);
 
     /**
      * Implementation of the builder pattern for a {@link PagerDutyNotificationEntry}.
      *
-     * @author Brandon Arp (brandon dot arp at smartsheet dot com)
+     * @author Sheldon White (sheldon.white at smartsheet dot com)
      */
     public static final class Builder extends OvalBuilder<PagerDutyNotificationEntry> {
         /**
@@ -113,6 +134,36 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
          */
         public Builder() {
             super(PagerDutyNotificationEntry::new);
+        }
+    }
+
+    private class PagerDutyContext {
+        private String type;
+        private String href;
+        private String text;
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getHref() {
+            return href;
+        }
+
+        public void setHref(String href) {
+            this.href = href;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public void setText(String text) {
+            this.text = text;
         }
     }
 }

@@ -45,6 +45,6 @@ public class PagerDutyNotificationRecipient implements NotificationRecipient {
 
     @Override
     public int hashCode() {
-        return Objects.hash("pagerduty");
+        return Objects.hashCode(getClass()); // act like a singleton
     }
 }

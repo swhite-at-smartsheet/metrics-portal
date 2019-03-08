@@ -67,6 +67,7 @@ public class WebHookNotificationRecipient extends NotificationRecipient {
                 .build();
     }
 
+    @SuppressWarnings("unused")
     private static final long serialVersionUID = 1L;
 }
 // CHECKSTYLE.ON: MemberNameCheck
