@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2018 Smartsheet.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,10 +37,8 @@ public class PagerDutyNotificationRecipient implements NotificationRecipient {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        return true;
+        // only allow a single instance
+        return o != null && getClass() == o.getClass();
     }
 
     @Override
