@@ -85,7 +85,7 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
                         }
                         return null;
                     });
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOGGER.error("notifyException() exception: " + e);
         }
         return null;
