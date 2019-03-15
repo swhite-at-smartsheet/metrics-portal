@@ -34,7 +34,8 @@ import java.util.Map;
         property = "type")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = EmailNotificationEntry.class, name = "email"),
-        @JsonSubTypes.Type(value = WebHookNotificationEntry.class, name = "webhook")
+        @JsonSubTypes.Type(value = WebHookNotificationEntry.class, name = "webhook"),
+        @JsonSubTypes.Type(value = PagerDutyNotificationEntry.class, name = "pagerduty")
 })
 public abstract class NotificationEntry {
     @JsonAnyGetter

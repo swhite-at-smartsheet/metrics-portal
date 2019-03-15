@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2018 Smartsheet.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,55 +15,45 @@
  */
 package models.ebean;
 
-import com.google.common.base.Objects;
 import models.internal.NotificationEntry;
-import models.internal.impl.WebHookNotificationEntry;
+import models.internal.impl.PagerDutyNotificationEntry;
 
-import java.net.URI;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import java.util.Objects;
 
 /**
- * An email address to send mail to.
+ * Model class for a pagerduty notification recipient.
+ * These do not have any internal state and act as singletons when creating a NotificationGroup.
  *
- * @author Brandon Arp (brandon dot arp at smartsheet dot com)
+ * @author Sheldon White (sheldon.white at smartsheet dot com)
  */
 // CHECKSTYLE.OFF: MemberNameCheck
 @Entity
-@DiscriminatorValue("webhook")
-public class WebHookNotificationRecipient extends NotificationRecipient {
+@DiscriminatorValue("pagerduty")
+public class PagerDutyNotificationRecipient extends NotificationRecipient {
     @Column(name = "value")
-    private URI address;
-    public URI getAddress() {
-        return address;
-    }
-
-    public void setAddress(final URI value) {
-        address = value;
-    }
+    private String label = "pagerduty"; // it seems like there needs to be at least one data member for persistence to work.
 
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final WebHookNotificationRecipient that = (WebHookNotificationRecipient) o;
-        return Objects.equal(address, that.address);
+        // only allow a single instance
+        return o != null && getClass() == o.getClass();
     }
+
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(address);
+        return Objects.hashCode(getClass()); // act like a singleton
     }
 
     @Override
     public NotificationEntry toInternal() {
-        return new WebHookNotificationEntry.Builder()
-                .setAddress(address)
+        return new PagerDutyNotificationEntry.Builder()
                 .build();
     }
 
