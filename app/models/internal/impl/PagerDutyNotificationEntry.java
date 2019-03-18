@@ -24,7 +24,6 @@ import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.mql.grammar.AlertTrigger;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Injector;
 import com.typesafe.config.Config;
@@ -33,6 +32,7 @@ import models.internal.NotificationEntry;
 
 import java.net.URI;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
@@ -48,14 +48,31 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
         LOGGER.debug().setMessage("executing pagerduty call").log();
         final Config typesafeConfig = injector.getInstance(Config.class);
         String pagerDutyEndpoint = typesafeConfig.getString("pagerDuty.uri");
+        final String pagerDutyServiceKey = typesafeConfig.getString("pagerDuty.serviceKey");
+        final String subject = String.format("Alert '%s' on %s in alarm ", alert.getName(), getGroupByString(trigger));
+        final String baseUrl = typesafeConfig.getString("alerts.baseUrl");
+        final String alertUrl = URI.create(baseUrl).resolve("/#alert/edit/" + alert.getId()).toString();
 
         try {
             final URI pagerDutyURI = new URI(pagerDutyEndpoint);
             final ActorSystem actorSystem = injector.getInstance(ActorSystem.class);
             final ObjectMapper mapper = injector.getInstance(ObjectMapper.class);
             final Http http = Http.get(actorSystem);
-            final PagerDutyAlert pagerDutyAlert = createPagerDutyAlert(typesafeConfig, alert, trigger);
-
+            final PagerDutyContext context = new PagerDutyContext.Builder()
+                    .setType("link")
+                    .setHref(alertUrl)
+                    .setText("View the alert in M-Portal")
+                    .build();
+            final PagerDutyContext[] contexts = { context };
+            final PagerDutyAlert pagerDutyAlert = new PagerDutyAlert.Builder()
+                    .setServiceKey(pagerDutyServiceKey)
+                    .setEventType("trigger")
+                    .setDescription(subject)
+                    .setAlert(alert)
+                    .setTrigger(trigger)
+                    .setAlertUrl(alertUrl)
+                    .setContexts(contexts)
+                    .build();
             return http
                     .singleRequest(
                             HttpRequest.POST(pagerDutyURI.toASCIIString())
@@ -67,29 +84,10 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
                         return null;
                     });
         } catch (final Exception e) {
-            LOGGER.error("notifyException() exception: " + e);
+            final CompletableFuture<Void> future = new CompletableFuture<>();
+            future.completeExceptionally(e);
+            return future;
         }
-        return null;
-    }
-
-    private PagerDutyAlert createPagerDutyAlert(final Config config, final Alert alert, final AlertTrigger alertTrigger) {
-        final PagerDutyAlert pagerDutyAlert = new PagerDutyAlert();
-        final String pagerDutyServiceKey = config.getString("pagerDuty.serviceKey");
-        final String subject = String.format("Alert '%s' on %s in alarm ", alert.getName(), getGroupByString(alertTrigger));
-        final String baseUrl = config.getString("alerts.baseUrl");
-        final String alertUrl = URI.create(baseUrl).resolve("/#alert/edit/" + alert.getId()).toString();
-
-        PagerDutyContext[] contexts = { new PagerDutyContext("link", alertUrl, "View the alert in M-Portal") };
-
-        pagerDutyAlert.setServiceKey(pagerDutyServiceKey);
-        pagerDutyAlert.setEventType("trigger");
-        pagerDutyAlert.setDescription(subject);
-        pagerDutyAlert.setAlert(alert);
-        pagerDutyAlert.setTrigger(alertTrigger);
-        pagerDutyAlert.setAlertUrl(alertUrl);
-        pagerDutyAlert.setContexts(contexts);
-
-        return pagerDutyAlert;
     }
 
     @Override
@@ -135,113 +133,6 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
          */
         public Builder() {
             super(PagerDutyNotificationEntry::new);
-        }
-    }
-
-    /**
-     * Model classes for a PagerDuty alert and the embedded context objects, as defined in their API document:
-     * https://v2.developer.pagerduty.com/docs/events-api
-     */
-    private class PagerDutyAlert {
-        @JsonProperty("service_key")
-        private String serviceKey;
-
-        @JsonProperty("event_type")
-        private String eventType;
-
-        @JsonProperty("description")
-        private String description;
-
-        @JsonProperty("alert")
-        private Alert alert;
-
-        @JsonProperty("trigger")
-        private AlertTrigger trigger;
-
-        @JsonProperty("alertUrl")
-        private String alertUrl;
-
-        @JsonProperty("contexts")
-        private PagerDutyContext[] contexts;
-
-        public String getServiceKey() {
-            return serviceKey;
-        }
-
-        public void setServiceKey(String serviceKey) {
-            this.serviceKey = serviceKey;
-        }
-
-        public String getEventType() {
-            return eventType;
-        }
-
-        public void setEventType(String eventType) {
-            this.eventType = eventType;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public void setDescription(String description) {
-            this.description = description;
-        }
-
-        public Alert getAlert() {
-            return alert;
-        }
-
-        public void setAlert(Alert alert) {
-            this.alert = alert;
-        }
-
-        public AlertTrigger getTrigger() {
-            return trigger;
-        }
-
-        public void setTrigger(AlertTrigger trigger) {
-            this.trigger = trigger;
-        }
-
-        public String getAlertUrl() {
-            return alertUrl;
-        }
-
-        public void setAlertUrl(String alertUrl) {
-            this.alertUrl = alertUrl;
-        }
-
-        public PagerDutyContext[] getContexts() {
-            return contexts;
-        }
-
-        public void setContexts(PagerDutyContext[] contexts) {
-            this.contexts = contexts;
-        }
-    }
-
-    private class PagerDutyContext {
-        private String type;
-        private String href;
-        private String text;
-
-        public PagerDutyContext(final String type, final String href, final String text) {
-            this.type = type;
-            this.href = href;
-            this.text = text;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public String getHref() {
-            return href;
-        }
-
-        public String getText() {
-            return text;
         }
     }
 }
