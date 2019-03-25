@@ -30,6 +30,8 @@ import com.google.inject.Injector;
 import com.typesafe.config.Config;
 import models.internal.Alert;
 import models.internal.NotificationEntry;
+import net.sf.oval.constraint.NotEmpty;
+import net.sf.oval.constraint.NotNull;
 
 import java.net.URI;
 import java.util.Objects;
@@ -94,7 +96,7 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
 
     @Override
     public models.view.NotificationEntry toView() {
-        return new models.view.PagerDutyNotificationEntry();
+        return new models.view.PagerDutyEndpoint();
     }
 
     @Override
@@ -136,6 +138,10 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
         public Builder() {
             super(PagerDutyNotificationEntry::new);
         }
+
+        @NotNull
+        @NotEmpty
+        private URI _name;
     }
 
     /**

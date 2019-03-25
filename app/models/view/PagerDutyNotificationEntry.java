@@ -1,5 +1,5 @@
-/*
- * Copyright 2018 Smartsheet
+/**
+ * Copyright 2017 Smartsheet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,20 @@ package models.view;
  * @author Sheldon White (sheldon.white at smartsheet dot com)
  */
 public class PagerDutyNotificationEntry extends NotificationEntry {
+    public String getName() {
+        return _name;
+    }
+
+    public void setName(final String name) {
+        _name = name;
+    }
+
+    private String _name;
 
     @Override
     public models.internal.NotificationEntry toInternal() {
         return new models.internal.impl.PagerDutyNotificationEntry.Builder()
+                .setName(_name)
                 .build();
     }
 }
