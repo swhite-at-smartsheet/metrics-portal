@@ -43,6 +43,7 @@ import com.arpnetworking.metrics.portal.hosts.HostRepository;
 import com.arpnetworking.metrics.portal.hosts.impl.HostProviderFactory;
 import com.arpnetworking.metrics.portal.notifications.NotificationRepository;
 import com.arpnetworking.metrics.portal.organizations.OrganizationProvider;
+import com.arpnetworking.metrics.portal.pagerduty.PagerDutyEndpointRepository;
 import com.arpnetworking.metrics.portal.query.QueryExecutor;
 import com.arpnetworking.metrics.util.JacksonCodec;
 import com.arpnetworking.play.configuration.ConfigurationHelper;
@@ -119,6 +120,9 @@ public class MainModule extends AbstractModule {
                 .asEagerSingleton();
         bind(AlertRepository.class)
                 .toProvider(AlertRepositoryProvider.class)
+                .asEagerSingleton();
+        bind(PagerDutyEndpointRepository.class)
+                .toProvider(PagerDutyEndpointRepositoryProvider.class)
                 .asEagerSingleton();
         bind(ExpressionRepository.class)
                 .toProvider(ExpressionRepositoryProvider.class)
@@ -401,6 +405,39 @@ public class MainModule extends AbstractModule {
         private final ApplicationLifecycle _lifecycle;
     }
 
+    private static final class PagerDutyEndpointRepositoryProvider implements Provider<PagerDutyEndpointRepository> {
+
+        @Inject
+        PagerDutyEndpointRepositoryProvider(
+                final Injector injector,
+                final Environment environment,
+                final Config configuration,
+                final ApplicationLifecycle lifecycle) {
+            _injector = injector;
+            _environment = environment;
+            _configuration = configuration;
+            _lifecycle = lifecycle;
+        }
+
+        @Override
+        public PagerDutyEndpointRepository get() {
+            final PagerDutyEndpointRepository repository = _injector.getInstance(
+                    ConfigurationHelper.<PagerDutyEndpointRepository>getType(_environment, _configuration, "pagerDutyEndpointRepository.type"));
+            repository.open();
+            _lifecycle.addStopHook(
+                    () -> {
+                        repository.close();
+                        return CompletableFuture.completedFuture(null);
+                    });
+            return repository;
+        }
+
+        private final Injector _injector;
+        private final Environment _environment;
+        private final Config _configuration;
+        private final ApplicationLifecycle _lifecycle;
+    }
+
     private static final class HostProviderProvider implements Provider<ActorRef> {
         @Inject
         HostProviderProvider(
@@ -430,6 +467,7 @@ public class MainModule extends AbstractModule {
 
         private static final String INDEXER_ROLE = "host_indexer";
     }
+
 
     private static final class AlertExecutionSchedulerProvider implements Provider<ActorRef> {
         @Inject
