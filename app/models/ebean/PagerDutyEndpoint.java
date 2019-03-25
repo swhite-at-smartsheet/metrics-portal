@@ -24,6 +24,7 @@ import models.internal.impl.DefaultPagerDutyEndpoint;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.UUID;
 
 /**
  * Data model for pagerduty endpoints.
@@ -36,8 +37,8 @@ import java.sql.Timestamp;
 public class PagerDutyEndpoint {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+    @Column(name = "uuid")
+    private UUID uuid;
 
     @Version
     @Column(name = "version")
@@ -63,12 +64,12 @@ public class PagerDutyEndpoint {
     @Column(name = "comment")
     private String comment;
 
-    public Long getId() {
-        return id;
+    public UUID getUuid() {
+        return uuid;
     }
 
-    public void setId(final Long value) {
-        id = value;
+    public void setUuid(final UUID value) {
+        uuid = value;
     }
 
     public Long getVersion() {

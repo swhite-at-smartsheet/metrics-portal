@@ -16,29 +16,24 @@
 package com.arpnetworking.metrics.portal.pagerduty.impl;
 
 import com.arpnetworking.metrics.portal.pagerduty.PagerDutyEndpointRepository;
-import com.arpnetworking.metrics.portal.pagerduty.notifications.NotificationRepository;
 import com.arpnetworking.play.configuration.ConfigurationHelper;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.typesafe.config.Config;
 import io.ebean.*;
-import models.ebean.NotificationRecipient;
-import models.internal.*;
-import models.internal.impl.DefaultNotificationGroupQuery;
-import models.internal.impl.DefaultQueryResult;
+import models.internal.NotificationGroupQuery;
+import models.internal.PagerDutyEndpoint;
 import play.Environment;
 import play.db.ebean.EbeanDynamicEvolutions;
 
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Repository for storing notification data in a database.
+ * A pagerduty endpoint repository backed by a database.
  *
  * @author Sheldon White (sheldon.white at smartsheet dot com)
  */
@@ -55,98 +50,90 @@ public class DatabasePagerDutyEndpointRepository implements PagerDutyEndpointRep
     public DatabasePagerDutyEndpointRepository(
             final Environment environment,
             final Config config,
-            final EbeanDynamicEvolutions ignored)
-            throws Exception {
-        this(ConfigurationHelper.<NotificationQueryGenerator>getType(
-                        environment,
-                        config,
-                        "notificationRepository.notificationQueryGenerator.type")
-                .getDeclaredConstructor()
-                .newInstance());
-
+            final EbeanDynamicEvolutions ignored) {
     }
 
     @Override
     public void open() {
-        assertIsOpen(false);
-        LOGGER.debug().setMessage("Opening notification repository").log();
-        _isOpen.set(true);
     }
 
     @Override
     public void close() {
-        assertIsOpen();
-        LOGGER.debug().setMessage("Closing notification repository").log();
-        _isOpen.set(false);
     }
 
 
-
     @Override
-    void addOrUpdatePagerDutyEndpoint(PagerDutyEndpoint pagerDutyEndpoint) {
-        assertIsOpen();
+    public Optional<PagerDutyEndpoint> get(final UUID identifier) {
         LOGGER.debug()
-                .setMessage("Upserting notification group")
-                .addData("group", group)
-                .addData("organization", organization)
+                .setMessage("Getting pagerduty endpoint")
+                .addData("identifier", identifier)
                 .log();
 
+        final models.ebean.PagerDutyEndpoint pagerDutyEndpoint = Ebean.find(models.ebean.PagerDutyEndpoint.class)
+                .where()
+                .eq("uuid", identifier)
+                .findOne();
+        if (pagerDutyEndpoint == null) {
+            return Optional.empty();
+        }
+        return Optional.of(pagerDutyEndpoint.toInternal());
+    }
+
+    @Override
+    public void upsert(PagerDutyEndpoint pagerDutyEndpoint) {
+        LOGGER.debug()
+                .setMessage("Upserting pagerduty endpoint")
+                .addData("endpoint", pagerDutyEndpoint)
+                .log();
 
         try (Transaction transaction = Ebean.beginTransaction()) {
-            models.ebean.NotificationGroup notificationGroup = Ebean.find(models.ebean.NotificationGroup.class)
+            models.ebean.PagerDutyEndpoint ebeanPagerDutyEndpoint = Ebean.find(models.ebean.PagerDutyEndpoint.class)
                     .where()
-                    .eq("uuid", group.getId())
-                    .eq("organization.uuid", organization.getId())
+                    .eq("uuid", pagerDutyEndpoint.getUuid())
                     .findOne();
-            boolean isNewGroup = false;
-            if (notificationGroup == null) {
-                notificationGroup = new models.ebean.NotificationGroup();
-                isNewGroup = true;
+            boolean isCreated = false;
+            if (ebeanPagerDutyEndpoint == null) {
+                ebeanPagerDutyEndpoint = new models.ebean.PagerDutyEndpoint();
+                isCreated = true;
             }
 
-            notificationGroup.setOrganization(models.ebean.Organization.findByOrganization(organization));
-            notificationGroup.setUuid(group.getId());
-            notificationGroup.setName(group.getName());
-            _notificationQueryGenerator.saveNotificationGroup(notificationGroup);
+            ebeanPagerDutyEndpoint.setUuid(pagerDutyEndpoint.getUuid());
+            ebeanPagerDutyEndpoint.setName(pagerDutyEndpoint.getName());
+            ebeanPagerDutyEndpoint.setAddress(pagerDutyEndpoint.getAddress());
+            ebeanPagerDutyEndpoint.setServiceKey(pagerDutyEndpoint.getServiceKey());
+            ebeanPagerDutyEndpoint.setComment(pagerDutyEndpoint.getComment());
             transaction.commit();
 
             LOGGER.info()
-                    .setMessage("Upserted notification group")
-                    .addData("group", group)
-                    .addData("organization", organization)
-                    .addData("isCreated", isNewGroup)
+                    .setMessage("Upserted pagerduty endpoint")
+                    .addData("endpoint", pagerDutyEndpoint)
+                    .addData("isCreated", isCreated)
                     .log();
             // CHECKSTYLE.OFF: IllegalCatchCheck
         } catch (final RuntimeException e) {
             // CHECKSTYLE.ON: IllegalCatchCheck
             LOGGER.error()
-                    .setMessage("Failed to upsert notification group")
-                    .addData("group", group)
-                    .addData("organization", organization)
+                    .setMessage("Failed to upsert pagerduty endpoint")
+                    .addData("endpoint", pagerDutyEndpoint)
                     .setThrowable(e)
                     .log();
             throw new PersistenceException(e);
         }
     }
 
-
-    private void assertIsOpen() {
-        assertIsOpen(true);
-    }
-
-    private void assertIsOpen(final boolean expectedState) {
-        if (_isOpen.get() != expectedState) {
-            throw new IllegalStateException(String.format("Notification repository is not %s", expectedState ? "open" : "closed"));
-        }
-    }
-
-
-    private DatabasePagerDutyEndpointRepository(final NotificationQueryGenerator queryGenerator) {
-        _notificationQueryGenerator = queryGenerator;
+    @Override
+    public int delete(final UUID identifier) {
+        LOGGER.debug()
+                .setMessage("Deleting pagerduty endpoint")
+                .addData("id", identifier)
+                .log();
+        return Ebean.find(models.ebean.PagerDutyEndpoint.class)
+                .where()
+                .eq("uuid", identifier)
+                .delete();
     }
 
     private final AtomicBoolean _isOpen = new AtomicBoolean(false);
-    private final NotificationQueryGenerator _notificationQueryGenerator;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabasePagerDutyEndpointRepository.class);
 

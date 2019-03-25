@@ -31,7 +31,7 @@ public interface PagerDutyEndpoint {
      *
      * @return The unique identifier of the endpoint.
      */
-    UUID getId();
+    UUID getUuid();
 
     /**
      * The name of the endpoint.

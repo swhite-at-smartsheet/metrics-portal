@@ -87,13 +87,13 @@ public class CassandraPagerDutyEndpointRepository implements PagerDutyEndpointRe
                 .log();
 
         final Mapper<models.cassandra.PagerDutyEndpoint> mapper = _mappingManager.mapper(models.cassandra.PagerDutyEndpoint.class);
-        models.cassandra.PagerDutyEndpoint cassandraPagerDutyEndpoint = mapper.get(pagerDutyEndpoint.getId());
+        models.cassandra.PagerDutyEndpoint cassandraPagerDutyEndpoint = mapper.get(pagerDutyEndpoint.getUuid());
 
         if (cassandraPagerDutyEndpoint == null) {
             cassandraPagerDutyEndpoint = new models.cassandra.PagerDutyEndpoint();
         }
 
-        cassandraPagerDutyEndpoint.setUuid(pagerDutyEndpoint.getId());
+        cassandraPagerDutyEndpoint.setUuid(pagerDutyEndpoint.getUuid());
         cassandraPagerDutyEndpoint.setName(pagerDutyEndpoint.getName());
         cassandraPagerDutyEndpoint.setAddress(pagerDutyEndpoint.getAddress());
         cassandraPagerDutyEndpoint.setServiceKey(pagerDutyEndpoint.getServiceKey());
