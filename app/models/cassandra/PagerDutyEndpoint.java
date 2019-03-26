@@ -15,15 +15,13 @@
  */
 package models.cassandra;
 
-import com.datastax.driver.mapping.Result;
-import com.datastax.driver.mapping.annotations.*;
-import models.internal.MetricsSoftwareState;
-import models.internal.impl.DefaultHost;
+import com.datastax.driver.mapping.annotations.Column;
+import com.datastax.driver.mapping.annotations.PartitionKey;
+import com.datastax.driver.mapping.annotations.Table;
 import models.internal.impl.DefaultPagerDutyEndpoint;
 import org.joda.time.Instant;
 
 import javax.persistence.Version;
-import java.util.UUID;
 
 /**
  * Model for pagerduty endpoints stored in Cassandra.
@@ -43,10 +41,7 @@ public class PagerDutyEndpoint {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
-    @Column(name = "uuid")
     @PartitionKey
-    private UUID uuid;
-
     @Column(name = "name")
     private String name;
 
@@ -81,14 +76,6 @@ public class PagerDutyEndpoint {
 
     public void setUpdatedAt(final Instant value) {
         updatedAt = value;
-    }
-
-    public UUID getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
     }
 
     public String getName() {

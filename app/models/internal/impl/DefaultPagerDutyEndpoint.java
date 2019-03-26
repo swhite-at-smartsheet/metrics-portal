@@ -36,18 +36,13 @@ import java.util.UUID;
 public final class DefaultPagerDutyEndpoint implements PagerDutyEndpoint {
 
     @Override
-    public UUID getId() {
-        return _id;
-    }
-
-    @Override
     public String getName() {
         return _name;
     }
 
     @Override
-    public String getAddress() {
-        return _address;
+    public String getPagerDutyUrl() {
+        return _pagerDutyUrl;
     }
 
     @Override
@@ -63,9 +58,8 @@ public final class DefaultPagerDutyEndpoint implements PagerDutyEndpoint {
     @Override
     public models.view.PagerDutyEndpoint toView() {
         final models.view.PagerDutyEndpoint viewPagerDutyEndpoint = new models.view.PagerDutyEndpoint();
-        viewPagerDutyEndpoint.setId(_id.toString());
         viewPagerDutyEndpoint.setName(_name);
-        viewPagerDutyEndpoint.setAddress(_address);
+        viewPagerDutyEndpoint.setPagerDutyUrl(_pagerDutyUrl);
         viewPagerDutyEndpoint.setServiceKey(_serviceKey);
         viewPagerDutyEndpoint.setComment(_comment);
         return viewPagerDutyEndpoint;
@@ -78,7 +72,7 @@ public final class DefaultPagerDutyEndpoint implements PagerDutyEndpoint {
                 .add("class", this.getClass())
                 .add("Id", _id)
                 .add("Name", _name)
-                .add("Address", _address)
+                .add("PagerDuty URL", _pagerDutyUrl)
                 .add("Service Key", _serviceKey)
                 .add("Comment", _comment)
                 .toString();
@@ -97,7 +91,7 @@ public final class DefaultPagerDutyEndpoint implements PagerDutyEndpoint {
         final DefaultPagerDutyEndpoint otherAlert = (DefaultPagerDutyEndpoint) other;
         return Objects.equals(_id, otherAlert._id)
                 && Objects.equals(_name, otherAlert._name)
-                && Objects.equals(_address, otherAlert._address)
+                && Objects.equals(_pagerDutyUrl, otherAlert._pagerDutyUrl)
                 && Objects.equals(_serviceKey, otherAlert._serviceKey)
                 && Objects.equals(_comment, otherAlert._comment);
     }
@@ -107,7 +101,7 @@ public final class DefaultPagerDutyEndpoint implements PagerDutyEndpoint {
         return Objects.hash(
                 _id,
                 _name,
-                _address,
+                _pagerDutyUrl,
                 _serviceKey,
                 _comment);
     }
@@ -115,14 +109,14 @@ public final class DefaultPagerDutyEndpoint implements PagerDutyEndpoint {
     private DefaultPagerDutyEndpoint(final Builder builder) {
         _id = builder._id;
         _name = builder._name;
-        _address = builder._address;
+        _pagerDutyUrl = builder._pagerDutyUrl;
         _serviceKey = builder._serviceKey;
         _comment = builder._comment;
     }
 
     private final UUID _id;
     private final String _name;
-    private final String _address;
+    private final String _pagerDutyUrl;
     private final String _serviceKey;
     private final String _comment;
 
@@ -161,13 +155,13 @@ public final class DefaultPagerDutyEndpoint implements PagerDutyEndpoint {
         }
 
         /**
-         * The address. Required. Cannot be null or empty.
+         * The pagerduty url. Required. Cannot be null or empty.
          *
-         * @param value The address.
+         * @param value The url.
          * @return This instance of <code>Builder</code>.
          */
-        public Builder setAddress(final String value) {
-            _address = value;
+        public Builder setPagerDutyUrl(final String value) {
+            _pagerDutyUrl = value;
             return this;
         }
         /**
@@ -199,7 +193,7 @@ public final class DefaultPagerDutyEndpoint implements PagerDutyEndpoint {
         private String _name;
         @NotNull
         @NotEmpty
-        private String _address;
+        private String _pagerDutyUrl;
         @NotNull
         @NotEmpty
         private String _serviceKey;

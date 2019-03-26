@@ -240,7 +240,7 @@ public class DatabaseNotificationRepository implements NotificationRepository {
             final NotificationEntry recipient) {
         assertIsOpen();
         LOGGER.debug()
-                .setMessage("Adding recipient to notification group")
+                .setMessage("Removing recipient from notification group")
                 .addData("group", group)
                 .addData("recipient", recipient)
                 .addData("organization", organization)

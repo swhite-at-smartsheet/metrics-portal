@@ -69,9 +69,9 @@ public class PagerDutyEndpointController extends Controller {
     }
 
     /**
-     * Adds an alert in the alert repository.
+     * Adds a pagerduty endpoint in the repository.
      *
-     * @return Ok if the alert was created or updated successfully, a failure HTTP status code otherwise.
+     * @return Ok if the endpoint was created or updated successfully, a failure HTTP status code otherwise.
      */
     public Result addOrUpdate() {
         final PagerDutyEndpoint pagerDutyEndpoint;
@@ -96,19 +96,13 @@ public class PagerDutyEndpointController extends Controller {
     }
 
     /**
-     * Get specific alert.
+     * Get specific pagerduty endpoint.
      *
-     * @param id The identifier of the alert.
+     * @param name The name of the endpoint.
      * @return Matching alert.
      */
-    public Result get(final String id) {
-        final UUID identifier;
-        try {
-            identifier = UUID.fromString(id);
-        } catch (final IllegalArgumentException e) {
-            return badRequest();
-        }
-        final Optional<PagerDutyEndpoint> result = _pagerDutyEndpointRepository.get(identifier);
+    public Result get(final String name) {
+        final Optional<PagerDutyEndpoint> result = _pagerDutyEndpointRepository.get(name);
         if (!result.isPresent()) {
             return notFound();
         }
@@ -117,14 +111,13 @@ public class PagerDutyEndpointController extends Controller {
     }
 
     /**
-     * Delete a specific alert.
+     * Delete a specific pagerduty endpoint.
      *
-     * @param id The identifier of the alert.
+     * @param name The name of the endpoint.
      * @return No content
      */
-    public Result delete(final String id) {
-        final UUID identifier = UUID.fromString(id);
-        final int deleted = _pagerDutyEndpointRepository.delete(identifier);
+    public Result delete(final String name) {
+        final int deleted = _pagerDutyEndpointRepository.delete(name);
         if (deleted > 0) {
             return noContent();
         } else {

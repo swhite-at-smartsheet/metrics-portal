@@ -40,7 +40,6 @@ import java.util.stream.Collectors;
 
 /**
  * Internal model representing a pagerduty notification entry.
- * These do not have any internal state and act as singletons when creating a NotificationGroup.
  *
  * @author Sheldon White (sheldon.white at smartsheet dot com)
  */
@@ -96,12 +95,14 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
 
     @Override
     public models.view.NotificationEntry toView() {
-        return new models.view.PagerDutyEndpoint();
+        final models.view.PagerDutyNotificationEntry view = new models.view.PagerDutyNotificationEntry();
+        view.setAddress(_address);
+        return view;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getClass()); // act like a singleton
+        return Objects.hash(_address);
     }
 
     @Override
@@ -109,11 +110,19 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
         if (this == o) {
             return true;
         }
-        // only allow a single instance
-        return o != null && getClass() == o.getClass();
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final PagerDutyNotificationEntry other = (PagerDutyNotificationEntry) o;
+        return Objects.equals(_address, other._address);
+    }
+
+    public String getAddress() {
+        return _address;
     }
 
     private PagerDutyNotificationEntry(final Builder builder) {
+        _address = builder._address;
     }
 
     private String getGroupByString(final AlertTrigger trigger) {
@@ -123,6 +132,8 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
                 .map(entry -> String.format("%s %s", entry.getKey(), entry.getValue()))
                 .collect(Collectors.joining(", "));
     }
+
+    private final String _address;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PagerDutyNotificationEntry.class);
 
@@ -139,9 +150,19 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
             super(PagerDutyNotificationEntry::new);
         }
 
+        /**
+         * The address. Required. Cannot be null or empty.
+         *
+         * @param value The email address.
+         * @return This instance of {@link PagerDutyNotificationEntry.Builder}.
+         */
+        public PagerDutyNotificationEntry.Builder setAddress(final String value) {
+            _address = value;
+            return this;
+        }
         @NotNull
         @NotEmpty
-        private URI _name;
+        private String _address;
     }
 
     /**

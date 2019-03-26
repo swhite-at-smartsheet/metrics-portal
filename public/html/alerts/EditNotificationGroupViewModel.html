@@ -70,10 +70,12 @@
     </li>
 </script>
 <script type="text/html" id="template-add-recipient-pagerduty">
+    <label for="pagerdutyNameInput">Endpoint Name</label>
+    <input class="form-control" data-bind="value: addAddress" type="text" id="pagerdutyNameInput" placeholder="Name">
 </script>
 <script type="text/html" id="template-recipient-pagerduty">
     <li>
-        <i class="fa fa-pager" aria-hidden="true"></i> <span>PagerDuty</span>
+        <i class="fa fa-pager" aria-hidden="true"></i> <span data-bind="text: address"></span>
         <a href="#" data-bind="click: $root.removeRecipient.bind($root)"><i class="fa fa-trash-o"></i></a>
     </li>
 </script>

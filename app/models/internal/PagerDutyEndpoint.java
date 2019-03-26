@@ -29,13 +29,6 @@ public interface PagerDutyEndpoint {
     /**
      * The unique identifier of the endpoint.
      *
-     * @return The unique identifier of the endpoint.
-     */
-    UUID getUuid();
-
-    /**
-     * The name of the endpoint.
-     *
      * @return The name of the endpoint.
      */
     String getName();
@@ -45,7 +38,7 @@ public interface PagerDutyEndpoint {
      *
      * @return The address.
      */
-    String getAddress();
+    String getPagerDutyUrl();
 
     /**
      * The service key of the endpoint.

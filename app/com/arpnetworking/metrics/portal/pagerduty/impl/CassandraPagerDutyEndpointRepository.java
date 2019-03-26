@@ -25,7 +25,6 @@ import com.google.inject.Inject;
 import models.internal.PagerDutyEndpoint;
 
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -62,14 +61,14 @@ public class CassandraPagerDutyEndpointRepository implements PagerDutyEndpointRe
     }
 
     @Override
-    public Optional<PagerDutyEndpoint> get(final UUID identifier) {
+    public Optional<PagerDutyEndpoint> get(final String name) {
         assertIsOpen();
         LOGGER.debug()
                 .setMessage("Getting pagerduty endpoint")
-                .addData("id", identifier)
+                .addData("name", name)
                 .log();
         final Mapper<models.cassandra.PagerDutyEndpoint> mapper = _mappingManager.mapper(models.cassandra.PagerDutyEndpoint.class);
-        final models.cassandra.PagerDutyEndpoint cassandraPagerDutyEndpoint = mapper.get(identifier);
+        final models.cassandra.PagerDutyEndpoint cassandraPagerDutyEndpoint = mapper.get(name);
 
         if (cassandraPagerDutyEndpoint == null) {
             return Optional.empty();
@@ -87,15 +86,14 @@ public class CassandraPagerDutyEndpointRepository implements PagerDutyEndpointRe
                 .log();
 
         final Mapper<models.cassandra.PagerDutyEndpoint> mapper = _mappingManager.mapper(models.cassandra.PagerDutyEndpoint.class);
-        models.cassandra.PagerDutyEndpoint cassandraPagerDutyEndpoint = mapper.get(pagerDutyEndpoint.getUuid());
+        models.cassandra.PagerDutyEndpoint cassandraPagerDutyEndpoint = mapper.get(pagerDutyEndpoint.getName());
 
         if (cassandraPagerDutyEndpoint == null) {
             cassandraPagerDutyEndpoint = new models.cassandra.PagerDutyEndpoint();
         }
 
-        cassandraPagerDutyEndpoint.setUuid(pagerDutyEndpoint.getUuid());
         cassandraPagerDutyEndpoint.setName(pagerDutyEndpoint.getName());
-        cassandraPagerDutyEndpoint.setAddress(pagerDutyEndpoint.getAddress());
+        cassandraPagerDutyEndpoint.setAddress(pagerDutyEndpoint.getPagerDutyUrl());
         cassandraPagerDutyEndpoint.setServiceKey(pagerDutyEndpoint.getServiceKey());
         cassandraPagerDutyEndpoint.setComment(pagerDutyEndpoint.getComment());
 
@@ -104,16 +102,16 @@ public class CassandraPagerDutyEndpointRepository implements PagerDutyEndpointRe
 
 
     @Override
-    public int delete(final UUID identifier) {
+    public int delete(final String name) {
         assertIsOpen();
         LOGGER.debug()
                 .setMessage("Deleting pagerduty endpoint")
-                .addData("id", identifier)
+                .addData("name", name)
                 .log();
-        final Optional<PagerDutyEndpoint> pagerDutyEndpoint = get(identifier);
+        final Optional<PagerDutyEndpoint> pagerDutyEndpoint = get(name);
         if (pagerDutyEndpoint.isPresent()) {
             final Mapper<models.cassandra.PagerDutyEndpoint> mapper = _mappingManager.mapper(models.cassandra.PagerDutyEndpoint.class);
-            mapper.delete(identifier);
+            mapper.delete(name);
             return 1;
         }
         return 0;

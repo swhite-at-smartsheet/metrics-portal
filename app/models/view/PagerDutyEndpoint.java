@@ -29,15 +29,7 @@ import java.util.UUID;
  * @author Sheldon White (sheldon.white at smartsheet dot com)
  */
 @Loggable
-public final class PagerDutyEndpoint extends NotificationEntry {
-
-    public void setId(final String value) {
-        _id = value;
-    }
-
-    public String getId() {
-        return _id;
-    }
+public final class PagerDutyEndpoint {
 
     public void setName(final String value) {
         _name = value;
@@ -47,12 +39,12 @@ public final class PagerDutyEndpoint extends NotificationEntry {
         return _name;
     }
 
-    public void setAddress(final String value) {
-        _address = value;
+    public void setPagerDutyUrl(final String value) {
+        _pagerDutyUrl = value;
     }
 
-    public String getAddress() {
-        return _address;
+    public String getPagerDutyUrl() {
+        return _pagerDutyUrl;
     }
 
     public void setServiceKey(final String value) {
@@ -76,9 +68,8 @@ public final class PagerDutyEndpoint extends NotificationEntry {
         return MoreObjects.toStringHelper(this)
                 .add("id", Integer.toHexString(System.identityHashCode(this)))
                 .add("class", this.getClass())
-                .add("Id", _id)
                 .add("Name", _name)
-                .add("Address", _address)
+                .add("PagerDuty URL", _pagerDutyUrl)
                 .add("Service Key", _serviceKey)
                 .add("Comment", _comment)
                 .toString();
@@ -93,27 +84,16 @@ public final class PagerDutyEndpoint extends NotificationEntry {
     public models.internal.PagerDutyEndpoint toInternal(final ObjectMapper objectMapper) {
         final DefaultPagerDutyEndpoint.Builder endpointBuilder = new DefaultPagerDutyEndpoint.Builder()
                 .setName(_name)
-                .setAddress(_address)
+                .setPagerDutyUrl(_pagerDutyUrl)
                 .setServiceKey(_serviceKey);
-        if (_id != null) {
-            endpointBuilder.setId(UUID.fromString(_id));
-        }
         if (_comment != null) {
             endpointBuilder.setComment(_comment);
         }
         return endpointBuilder.build();
     }
 
-    @Override
-    public models.internal.NotificationEntry toInternal() {
-        return new DefaultEmailNotificationEntry.Builder()
-                .setAddress(_address)
-                .build();
-    }
-
-    private String _id;
     private String _name;
-    private String _address;
+    private String _pagerDutyUrl;
     private String _serviceKey;
     private String _comment;
 }

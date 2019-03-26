@@ -34,27 +34,39 @@ import java.util.Objects;
 @DiscriminatorValue("pagerduty")
 public class PagerDutyNotificationRecipient extends NotificationRecipient {
     @Column(name = "value")
-    private String label = "pagerduty"; // it seems like there needs to be at least one data member for persistence to work.
+    private String _address;
+
+    public String getAddress() {
+        return _address;
+    }
+
+    public void setAddress(final String address) {
+        _address = address;
+    }
+
+    @Override
+    public NotificationEntry toInternal() {
+        return new PagerDutyNotificationEntry.Builder()
+                .setAddress(_address)
+                .build();
+    }
 
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-        // only allow a single instance
-        return o != null && getClass() == o.getClass();
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final PagerDutyNotificationRecipient that = (PagerDutyNotificationRecipient) o;
+        return Objects.equals(_address, that._address);
     }
-
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getClass()); // act like a singleton
-    }
 
-    @Override
-    public NotificationEntry toInternal() {
-        return new PagerDutyNotificationEntry.Builder()
-                .build();
+        return Objects.hash(_address);
     }
 
     @SuppressWarnings("unused")
