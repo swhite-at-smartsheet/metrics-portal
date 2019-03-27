@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 Smartsheet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,17 +16,21 @@
 package com.arpnetworking.metrics.portal.pagerduty.impl;
 
 import com.arpnetworking.metrics.portal.pagerduty.PagerDutyEndpointRepository;
+import com.arpnetworking.play.configuration.ConfigurationHelper;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.typesafe.config.Config;
 import io.ebean.*;
-import models.internal.NotificationGroupQuery;
-import models.internal.PagerDutyEndpoint;
+import models.internal.*;
+import models.internal.impl.DefaultPagerDutyEndpointQuery;
+import models.internal.impl.DefaultQueryResult;
 import play.Environment;
 import play.db.ebean.EbeanDynamicEvolutions;
 
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -48,28 +52,51 @@ public class DatabasePagerDutyEndpointRepository implements PagerDutyEndpointRep
     public DatabasePagerDutyEndpointRepository(
             final Environment environment,
             final Config config,
-            final EbeanDynamicEvolutions ignored) {
+            final EbeanDynamicEvolutions ignored) throws Exception {
+        this(
+                ConfigurationHelper.<DatabasePagerDutyEndpointRepository.PagerDutyEndpointQueryGenerator>getType(
+                        environment,
+                        config,
+                        "pagerDutyEndpointRepository.pagerDutyEndpointQueryGenerator.type")
+                        .getDeclaredConstructor()
+                        .newInstance());
+    }
+
+    /**
+     * Public constructor.
+     *
+     * @param queryGenerator Instance of <code>PagerDutyEndpointQueryGenerator</code>.
+     */
+    public DatabasePagerDutyEndpointRepository(final DatabasePagerDutyEndpointRepository.PagerDutyEndpointQueryGenerator queryGenerator) {
+        _pagerDutyEndpointQueryGenerator = queryGenerator;
     }
 
     @Override
     public void open() {
+        assertIsOpen(false);
+        LOGGER.debug().setMessage("Opening pagerduty endpoints repository").log();
+        _isOpen.set(true);
     }
 
     @Override
     public void close() {
+        assertIsOpen();
+        LOGGER.debug().setMessage("Closing pagerduty endpoints repository").log();
+        _isOpen.set(false);
     }
 
-
     @Override
-    public Optional<PagerDutyEndpoint> get(final String name) {
+    public Optional<PagerDutyEndpoint> get(final String name, Organization organization) {
         LOGGER.debug()
                 .setMessage("Getting pagerduty endpoint")
                 .addData("identifier", name)
+                .addData("organization", organization)
                 .log();
 
         final models.ebean.PagerDutyEndpoint pagerDutyEndpoint = Ebean.find(models.ebean.PagerDutyEndpoint.class)
                 .where()
                 .eq("name", name)
+                .eq("organization.uuid", organization.getId())
                 .findOne();
         if (pagerDutyEndpoint == null) {
             return Optional.empty();
@@ -78,16 +105,46 @@ public class DatabasePagerDutyEndpointRepository implements PagerDutyEndpointRep
     }
 
     @Override
-    public void upsert(PagerDutyEndpoint pagerDutyEndpoint) {
+    public PagerDutyEndpointQuery createQuery(final Organization organization) {
+        assertIsOpen();
+        LOGGER.debug()
+                .setMessage("Preparing query")
+                .addData("organization", organization)
+                .log();
+        return new DefaultPagerDutyEndpointQuery(this, organization);
+    }
+
+    @Override
+    public QueryResult<PagerDutyEndpoint> query(final PagerDutyEndpointQuery query) {
+        assertIsOpen();
+        LOGGER.debug()
+                .setMessage("Querying")
+                .addData("query", query)
+                .log();
+
+        // Create the base query
+        final PagedList<models.ebean.PagerDutyEndpoint> pagedPagerDutyEndpoints = _pagerDutyEndpointQueryGenerator.createPagerDutyEndpointQuery(query);
+
+        final List<PagerDutyEndpoint> values = new ArrayList<>();
+        pagedPagerDutyEndpoints.getList().forEach(ebeanPagerDutyEndpoint -> values.add(ebeanPagerDutyEndpoint.toInternal()));
+
+        // Transform the results
+        return new DefaultQueryResult<>(values, pagedPagerDutyEndpoints.getTotalCount());
+    }
+
+    @Override
+    public void upsert(PagerDutyEndpoint pagerDutyEndpoint, Organization organization) {
         LOGGER.debug()
                 .setMessage("Upserting pagerduty endpoint")
                 .addData("endpoint", pagerDutyEndpoint)
+                .addData("organization", organization)
                 .log();
 
         try (Transaction transaction = Ebean.beginTransaction()) {
             models.ebean.PagerDutyEndpoint ebeanPagerDutyEndpoint = Ebean.find(models.ebean.PagerDutyEndpoint.class)
                     .where()
                     .eq("name", pagerDutyEndpoint.getName())
+                    .eq("organization.uuid", organization.getId())
                     .findOne();
             boolean isCreated = false;
             if (ebeanPagerDutyEndpoint == null) {
@@ -96,9 +153,11 @@ public class DatabasePagerDutyEndpointRepository implements PagerDutyEndpointRep
             }
 
             ebeanPagerDutyEndpoint.setName(pagerDutyEndpoint.getName());
-            ebeanPagerDutyEndpoint.setAddress(pagerDutyEndpoint.getPagerDutyUrl());
+            ebeanPagerDutyEndpoint.setPagerDutyUrl(pagerDutyEndpoint.getPagerDutyUrl());
             ebeanPagerDutyEndpoint.setServiceKey(pagerDutyEndpoint.getServiceKey());
             ebeanPagerDutyEndpoint.setComment(pagerDutyEndpoint.getComment());
+            ebeanPagerDutyEndpoint.setOrganization(models.ebean.Organization.findByOrganization(organization));
+
             transaction.commit();
 
             LOGGER.info()
@@ -119,25 +178,38 @@ public class DatabasePagerDutyEndpointRepository implements PagerDutyEndpointRep
     }
 
     @Override
-    public int delete(final String name) {
+    public int delete(final String name, Organization organization) {
         LOGGER.debug()
                 .setMessage("Deleting pagerduty endpoint")
                 .addData("name", name)
+                .addData("organization", organization)
                 .log();
         return Ebean.find(models.ebean.PagerDutyEndpoint.class)
                 .where()
                 .eq("name", name)
+                .eq("organization.uuid", organization.getId())
                 .delete();
     }
 
+    private void assertIsOpen() {
+        assertIsOpen(true);
+    }
+
+    private void assertIsOpen(final boolean expectedState) {
+        if (_isOpen.get() != expectedState) {
+            throw new IllegalStateException(String.format("PagerDutyEndpointRepository repository is not %s", expectedState ? "open" : "closed"));
+        }
+    }
+
     private final AtomicBoolean _isOpen = new AtomicBoolean(false);
+    private final PagerDutyEndpointQueryGenerator _pagerDutyEndpointQueryGenerator;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabasePagerDutyEndpointRepository.class);
 
     /**
-     * Inteface for database query generation.
+     * Interface for database query generation.
      */
-    public interface NotificationQueryGenerator {
+    public interface PagerDutyEndpointQueryGenerator {
 
         /**
          * Translate the <code>NotificationQuery</code> to an Ebean <code>Query</code>.
@@ -145,33 +217,33 @@ public class DatabasePagerDutyEndpointRepository implements PagerDutyEndpointRep
          * @param query The repository agnostic {@link NotificationGroupQuery}.
          * @return The database specific {@link PagedList} query result.
          */
-        PagedList<models.ebean.NotificationGroup> createNotificationGroupQuery(NotificationGroupQuery query);
+        PagedList<models.ebean.PagerDutyEndpoint> createPagerDutyEndpointQuery(PagerDutyEndpointQuery query);
 
         /**
-         * Save the {@link models.ebean.NotificationGroup} to the database. This needs to be executed in a transaction.
+         * Save the {@link models.ebean.PagerDutyEndpoint} to the database. This needs to be executed in a transaction.
          *
-         * @param notificationGroup The {@link models.ebean.NotificationGroup} model instance to save.
+         * @param pagerDutyEndpoint The {@link models.ebean.PagerDutyEndpoint} model instance to save.
          */
-        void saveNotificationGroup(models.ebean.NotificationGroup notificationGroup);
+        void savePagerDutyEndpoint(models.ebean.PagerDutyEndpoint pagerDutyEndpoint);
     }
 
     /**
-     * RDBMS agnostic query for notification groups.
+     * RDBMS agnostic query for pagerduty endpoints.
      */
-    public static final class GenericQueryGenerator implements NotificationQueryGenerator {
+    public static final class GenericQueryGenerator implements PagerDutyEndpointQueryGenerator {
 
         @Override
-        public PagedList<models.ebean.NotificationGroup> createNotificationGroupQuery(final NotificationGroupQuery query) {
-            ExpressionList<models.ebean.NotificationGroup> ebeanExpressionList = Ebean.find(models.ebean.NotificationGroup.class).where();
+        public PagedList<models.ebean.PagerDutyEndpoint> createPagerDutyEndpointQuery(final PagerDutyEndpointQuery query) {
+            ExpressionList<models.ebean.PagerDutyEndpoint> ebeanExpressionList = Ebean.find(models.ebean.PagerDutyEndpoint.class).where();
             ebeanExpressionList = ebeanExpressionList.eq("organization.uuid", query.getOrganization().getId());
 
             //TODO(deepika): Add full text search [ISSUE-11]
             if (query.getContains().isPresent()) {
-                final Junction<models.ebean.NotificationGroup> junction = ebeanExpressionList.disjunction();
+                final Junction<models.ebean.PagerDutyEndpoint> junction = ebeanExpressionList.disjunction();
                 ebeanExpressionList = junction.ilike("name", "%" + query.getContains().get() + "%");
                 ebeanExpressionList = ebeanExpressionList.endJunction();
             }
-            final Query<models.ebean.NotificationGroup> ebeanQuery = ebeanExpressionList.query();
+            final Query<models.ebean.PagerDutyEndpoint> ebeanQuery = ebeanExpressionList.query();
             int offset = 0;
             if (query.getOffset().isPresent()) {
                 offset = query.getOffset().get();
@@ -180,8 +252,8 @@ public class DatabasePagerDutyEndpointRepository implements PagerDutyEndpointRep
         }
 
         @Override
-        public void saveNotificationGroup(final models.ebean.NotificationGroup notificationGroup) {
-            Ebean.save(notificationGroup);
+        public void savePagerDutyEndpoint(final models.ebean.PagerDutyEndpoint pagerDutyEndpoint) {
+            Ebean.save(pagerDutyEndpoint);
         }
     }
 }

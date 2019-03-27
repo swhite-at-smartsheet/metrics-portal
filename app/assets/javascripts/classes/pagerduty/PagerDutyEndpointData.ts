@@ -20,15 +20,15 @@ import Quantity = require('../Quantity');
 class PagerDutyEndpointData {
     id: string;
     name: string;
-    address: string;
+    pagerDutyUrl: string;
     serviceKey: string;
     comment: string
     editUri: KnockoutComputed<string>;
 
-    constructor(id: string, name: string, address: string, serviceKey: string, comment: string) {
+    constructor(id: string, name: string, pagerDutyUrl: string, serviceKey: string, comment: string) {
         this.id = id;
         this.name = name;
-        this.address = address;
+        this.pagerDutyUrl = pagerDutyUrl;
         this.serviceKey = serviceKey;
         this.comment = comment;
 

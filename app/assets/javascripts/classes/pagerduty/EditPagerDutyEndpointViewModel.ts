@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import AlertData = require('./AlertData');
-import {NotificationGroup} from './NotificationGroup';
+import AlertData = require('../alerts/AlertData');
+import {NotificationGroup} from '../alerts/NotificationGroup';
 import ko = require('knockout');
 import $ = require('jquery');
 import uuid = require('../Uuid');
@@ -50,7 +50,7 @@ class EditPagerDutyEndpointViewModel {
         $.getJSON("/v1/pagerdutyendpoints/" + id, {}, (data: PagerDutyEndpointData) => {
             this.id(data.id);
             this.name(data.name);
-            this.address(data.address);
+            this.address(data.pagerDutyUrl);
             this.serviceKey(data.serviceKey);
             this.comment(data.comment);
         });

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 Smartsheet.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,11 +21,20 @@ import com.arpnetworking.steno.LoggerFactory;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.MappingManager;
+import com.datastax.driver.mapping.Result;
 import com.google.inject.Inject;
-import models.internal.PagerDutyEndpoint;
+import models.internal.*;
+import models.internal.impl.DefaultPagerDutyEndpointQuery;
+import models.internal.impl.DefaultQueryResult;
 
+import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.Spliterator;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * A pagerduty endpoint repository backed by cassandra.
@@ -61,11 +70,12 @@ public class CassandraPagerDutyEndpointRepository implements PagerDutyEndpointRe
     }
 
     @Override
-    public Optional<PagerDutyEndpoint> get(final String name) {
+    public Optional<PagerDutyEndpoint> get(final String name, final Organization organization) {
         assertIsOpen();
         LOGGER.debug()
                 .setMessage("Getting pagerduty endpoint")
                 .addData("name", name)
+                .addData("organization", organization)
                 .log();
         final Mapper<models.cassandra.PagerDutyEndpoint> mapper = _mappingManager.mapper(models.cassandra.PagerDutyEndpoint.class);
         final models.cassandra.PagerDutyEndpoint cassandraPagerDutyEndpoint = mapper.get(name);
@@ -78,7 +88,7 @@ public class CassandraPagerDutyEndpointRepository implements PagerDutyEndpointRe
     }
 
     @Override
-    public void upsert(final PagerDutyEndpoint pagerDutyEndpoint) {
+    public void upsert(final PagerDutyEndpoint pagerDutyEndpoint, final Organization organization) {
         assertIsOpen();
         LOGGER.debug()
                 .setMessage("Upserting pagerduty endpoint")
@@ -93,22 +103,57 @@ public class CassandraPagerDutyEndpointRepository implements PagerDutyEndpointRe
         }
 
         cassandraPagerDutyEndpoint.setName(pagerDutyEndpoint.getName());
-        cassandraPagerDutyEndpoint.setAddress(pagerDutyEndpoint.getPagerDutyUrl());
+        cassandraPagerDutyEndpoint.setPagerDutyUrl(pagerDutyEndpoint.getPagerDutyUrl());
         cassandraPagerDutyEndpoint.setServiceKey(pagerDutyEndpoint.getServiceKey());
         cassandraPagerDutyEndpoint.setComment(pagerDutyEndpoint.getComment());
+        cassandraPagerDutyEndpoint.setOrganization(organization.getId());
 
         mapper.save(cassandraPagerDutyEndpoint);
     }
 
+    @Override
+    public PagerDutyEndpointQuery createQuery(final Organization organization) {
+        assertIsOpen();
+        LOGGER.debug()
+                .setMessage("Preparing query")
+                .addData("organization", organization)
+                .log();
+        return new DefaultPagerDutyEndpointQuery(this, organization);
+    }
 
     @Override
-    public int delete(final String name) {
+    public QueryResult<PagerDutyEndpoint> query(final PagerDutyEndpointQuery query) {
+        final Mapper<models.cassandra.PagerDutyEndpoint> mapper = _mappingManager.mapper(models.cassandra.PagerDutyEndpoint.class);
+        final models.cassandra.PagerDutyEndpoint.PagerDutyEndpointQueries accessor = mapper.getManager().createAccessor(models.cassandra.PagerDutyEndpoint.PagerDutyEndpointQueries.class);
+        final Result<models.cassandra.PagerDutyEndpoint> result = accessor.getEndpointsForOrganization(query.getOrganization().getId());
+        final Spliterator<models.cassandra.PagerDutyEndpoint> allEndpoints = result.spliterator();
+        final int start = query.getOffset().orElse(0);
+
+        Stream<models.cassandra.PagerDutyEndpoint> endpointStream = StreamSupport.stream(allEndpoints, false);
+
+        if (query.getContains().isPresent()) {
+            endpointStream = endpointStream.filter(endpoint -> {
+                final String contains = query.getContains().get().toLowerCase(Locale.ENGLISH);
+                return endpoint.getName().toLowerCase(Locale.ENGLISH).contains(contains);
+            });
+        }
+
+        final List<PagerDutyEndpoint> endpoints = endpointStream
+                .map(endpoint -> endpoint.toInternal())
+                .collect(Collectors.toList());
+        final List<PagerDutyEndpoint> paginated = endpoints.stream().skip(start).limit(query.getLimit()).collect(Collectors.toList());
+        return new DefaultQueryResult<>(paginated, endpoints.size());
+    }
+
+    @Override
+    public int delete(final String name, final Organization organization) {
         assertIsOpen();
         LOGGER.debug()
                 .setMessage("Deleting pagerduty endpoint")
                 .addData("name", name)
+                .addData("organization", organization)
                 .log();
-        final Optional<PagerDutyEndpoint> pagerDutyEndpoint = get(name);
+        final Optional<PagerDutyEndpoint> pagerDutyEndpoint = get(name, organization);
         if (pagerDutyEndpoint.isPresent()) {
             final Mapper<models.cassandra.PagerDutyEndpoint> mapper = _mappingManager.mapper(models.cassandra.PagerDutyEndpoint.class);
             mapper.delete(name);

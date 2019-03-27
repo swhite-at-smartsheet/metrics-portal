@@ -25,7 +25,7 @@ class PagerDutyEndpointsList extends PaginatedSearchableList<PagerDutyEndpointDa
             const endpointsList: PagerDutyEndpointData[] = data.data.map((v: PagerDutyEndpointData)=> { return new PagerDutyEndpointData(
                 v.id,
                 v.name,
-                v.address,
+                v.pagerDutyUrl,
                 v.serviceKey,
                 v.comment
             );});

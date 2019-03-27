@@ -63,9 +63,9 @@ public class PagerDutyEndpointController extends Controller {
     @Inject
     public PagerDutyEndpointController(
             final Config configuration,
-            final PagerDutyEndpointRepository pagerDutyEndpointRepository) {
-        _pagerDutyEndpointRepository = pagerDutyEndpointRepository;
-
+            final PagerDutyEndpointRepository pagerDutyEndpointRepository,
+            final OrganizationProvider organizationProvider) {
+        this(configuration.getInt("pagerDutyEndpoints.limit"), pagerDutyEndpointRepository, organizationProvider);
     }
 
     /**
@@ -102,12 +102,83 @@ public class PagerDutyEndpointController extends Controller {
      * @return Matching alert.
      */
     public Result get(final String name) {
-        final Optional<PagerDutyEndpoint> result = _pagerDutyEndpointRepository.get(name);
+        final Organization organization = _organizationProvider.getOrganization(request());
+        final Optional<PagerDutyEndpoint> result = _pagerDutyEndpointRepository.get(name, organization);
         if (!result.isPresent()) {
             return notFound();
         }
         // Return as JSON
         return ok(Json.toJson(result.get().toView()));
+    }
+
+    /**
+     * Query for pagerduty endpoints.
+     *
+     * @param contains The text to search for. Optional.
+     * @param limit The maximum number of results to return. Optional.
+     * @param offset The number of results to skip. Optional.
+     * @return <code>Result</code> paginated matching notification groups.
+     */
+    // CHECKSTYLE.OFF: ParameterNameCheck - Names must match query parameters.
+    public Result query(
+            final String contains,
+            final Integer limit,
+            final Integer offset) {
+        // CHECKSTYLE.ON: ParameterNameCheck
+
+        // Convert and validate parameters
+        final Optional<String> argContains = Optional.ofNullable(contains);
+        final Optional<Integer> argOffset = Optional.ofNullable(offset);
+        final int argLimit = Math.min(_maxLimit, Optional.of(MoreObjects.firstNonNull(limit, _maxLimit)).get());
+        if (argLimit < 0) {
+            return badRequest("Invalid limit; must be greater than or equal to 0");
+        }
+        if (argOffset.isPresent() && argOffset.get() < 0) {
+            return badRequest("Invalid offset; must be greater than or equal to 0");
+        }
+
+        // Build conditions map
+        final Map<String, String> conditions = Maps.newHashMap();
+        if (argContains.isPresent()) {
+            conditions.put("contains", argContains.get());
+        }
+
+        // Build a endpoint repository query
+        final PagerDutyEndpointQuery query = _pagerDutyEndpointRepository.createQuery(_organizationProvider.getOrganization(request()))
+                .contains(argContains)
+                .limit(argLimit)
+                .offset(argOffset);
+
+        // Execute the query
+        final QueryResult<PagerDutyEndpoint> result;
+        try {
+            result = query.execute();
+            // CHECKSTYLE.OFF: IllegalCatch - Convert any exception to 500
+        } catch (final Exception e) {
+            // CHECKSTYLE.ON: IllegalCatch
+            LOGGER.error()
+                    .setMessage("Notification group query failed")
+                    .setThrowable(e)
+                    .log();
+            return internalServerError();
+        }
+
+        // Wrap the query results and return as JSON
+        if (result.etag().isPresent()) {
+            response().setHeader(HttpHeaders.ETAG, result.etag().get());
+        }
+        return ok(Json.toJson(new PagedContainer<>(
+                result.values()
+                        .stream()
+                        .map(PagerDutyEndpoint::toView)
+                        .collect(Collectors.toList()),
+                new Pagination(
+                        request().path(),
+                        result.total(),
+                        result.values().size(),
+                        argLimit,
+                        argOffset,
+                        conditions))));
     }
 
     /**
@@ -117,7 +188,8 @@ public class PagerDutyEndpointController extends Controller {
      * @return No content
      */
     public Result delete(final String name) {
-        final int deleted = _pagerDutyEndpointRepository.delete(name);
+        final Organization organization = _organizationProvider.getOrganization(request());
+        final int deleted = _pagerDutyEndpointRepository.delete(name, organization);
         if (deleted > 0) {
             return noContent();
         } else {
@@ -125,7 +197,18 @@ public class PagerDutyEndpointController extends Controller {
         }
     }
 
+    private PagerDutyEndpointController(
+            final int maxLimit,
+            final PagerDutyEndpointRepository pagerDutyEndpointRepository,
+            final OrganizationProvider organizationProvider) {
+        _maxLimit = maxLimit;
+        _pagerDutyEndpointRepository = pagerDutyEndpointRepository;
+        _organizationProvider = organizationProvider;
+    }
+
+    private final int _maxLimit;
     private final PagerDutyEndpointRepository _pagerDutyEndpointRepository;
+    private final OrganizationProvider _organizationProvider;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PagerDutyEndpointController.class);
     private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.getInstance();

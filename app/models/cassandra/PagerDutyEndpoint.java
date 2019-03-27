@@ -15,13 +15,13 @@
  */
 package models.cassandra;
 
-import com.datastax.driver.mapping.annotations.Column;
-import com.datastax.driver.mapping.annotations.PartitionKey;
-import com.datastax.driver.mapping.annotations.Table;
+import com.datastax.driver.mapping.Result;
+import com.datastax.driver.mapping.annotations.*;
 import models.internal.impl.DefaultPagerDutyEndpoint;
 import org.joda.time.Instant;
 
 import javax.persistence.Version;
+import java.util.UUID;
 
 /**
  * Model for pagerduty endpoints stored in Cassandra.
@@ -45,14 +45,17 @@ public class PagerDutyEndpoint {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "address")
-    private String address;
+    @Column(name = "pagerduty_url")
+    private String pagerDutyUrl;
 
     @Column(name = "service_key")
     private String serviceKey;
 
     @Column(name = "comment")
     private String comment;
+
+    @Column(name = "organization")
+    private UUID organization;
 
     public Long getVersion() {
         return version;
@@ -86,12 +89,12 @@ public class PagerDutyEndpoint {
         name = value;
     }
 
-    public String getAddress() {
-        return address;
+    public String getPagerDutyUrl() {
+        return pagerDutyUrl;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setPagerDutyUrl(String pagerDutyUrl) {
+        this.pagerDutyUrl = pagerDutyUrl;
     }
 
     public String getServiceKey() {
@@ -110,6 +113,14 @@ public class PagerDutyEndpoint {
         this.comment = comment;
     }
 
+    public UUID getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(UUID organization) {
+        this.organization = organization;
+    }
+
     /**
      * Converts this model into an {@link models.internal.Host}.
      *
@@ -118,10 +129,27 @@ public class PagerDutyEndpoint {
     public models.internal.PagerDutyEndpoint toInternal() {
         final DefaultPagerDutyEndpoint.Builder builder = new DefaultPagerDutyEndpoint.Builder()
                 .setName(getName())
-                .setAddress(getAddress())
+                .setPagerDutyUrl(getPagerDutyUrl())
                 .setServiceKey(getServiceKey())
                 .setComment(getComment());
         return builder.build();
+    }
+
+    /**
+     * Queries for pagerduty endpoints.
+     *
+     * @author Sheldon White (sheldon.white at smartsheet dot com)
+     */
+    @Accessor
+    public interface PagerDutyEndpointQueries {
+        /**
+         * Queries for all pagerduty endpoints in an organization.
+         *
+         * @param organization Organization owning the endpoints
+         * @return Mapped query results
+         */
+        @Query("select * from portal.pagerduty_endpoints_by_organization where organization = :org")
+        Result<PagerDutyEndpoint> getEndpointsForOrganization(@Param("org") UUID organization);
     }
 }
 // CHECKSTYLE.ON: MemberNameCheck

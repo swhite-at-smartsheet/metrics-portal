@@ -230,7 +230,7 @@ public class AlertController extends Controller {
         if (!result.isPresent()) {
             return notFound();
         }
-        // Return as JSON
+        // Return as JSONalerts
         return ok(Json.toJson(result.get().toView()));
     }
 

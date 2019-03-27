@@ -60,6 +60,10 @@ public class PagerDutyEndpoint {
     @Column(name = "comment")
     private String comment;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "organization")
+    private Organization organization;
+
     public Long getVersion() {
         return version;
     }
@@ -96,8 +100,8 @@ public class PagerDutyEndpoint {
         return pagerDutyUrl;
     }
 
-    public void setPagerDutyUrl(String address) {
-        this.pagerDutyUrl = address;
+    public void setPagerDutyUrl(String pagerDutyUrl) {
+        this.pagerDutyUrl = pagerDutyUrl;
     }
 
     public String getServiceKey() {
@@ -114,6 +118,14 @@ public class PagerDutyEndpoint {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public Organization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
     }
 
     /**
