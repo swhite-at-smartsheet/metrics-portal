@@ -18,7 +18,6 @@ package models.view;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
-import models.internal.impl.DefaultEmailNotificationEntry;
 import models.internal.impl.DefaultPagerDutyEndpoint;
 
 import java.util.UUID;
@@ -30,6 +29,14 @@ import java.util.UUID;
  */
 @Loggable
 public final class PagerDutyEndpoint {
+
+    public void setId(final String value) {
+        _id = value;
+    }
+
+    public String getId() {
+        return _id;
+    }
 
     public void setName(final String value) {
         _name = value;
@@ -86,12 +93,16 @@ public final class PagerDutyEndpoint {
                 .setName(_name)
                 .setPagerDutyUrl(_pagerDutyUrl)
                 .setServiceKey(_serviceKey);
+        if (_id != null) {
+            endpointBuilder.setId(UUID.fromString(_id));
+        }
         if (_comment != null) {
             endpointBuilder.setComment(_comment);
         }
         return endpointBuilder.build();
     }
 
+    private String _id;
     private String _name;
     private String _pagerDutyUrl;
     private String _serviceKey;

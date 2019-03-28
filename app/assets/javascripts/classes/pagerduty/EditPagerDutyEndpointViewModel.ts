@@ -28,7 +28,7 @@ import PagerDutyEndpointData = require("./PagerDutyEndpointData");
 class EditPagerDutyEndpointViewModel {
     id = ko.observable<string>("");
     name = ko.observable<string>("");
-    address = ko.observable<string>("");
+    pagerDutyUrl = ko.observable<string>("");
     serviceKey = ko.observable<string>("");
     comment = ko.observable<string>("");
     container: HTMLElement;
@@ -50,7 +50,7 @@ class EditPagerDutyEndpointViewModel {
         $.getJSON("/v1/pagerdutyendpoints/" + id, {}, (data: PagerDutyEndpointData) => {
             this.id(data.id);
             this.name(data.name);
-            this.address(data.pagerDutyUrl);
+            this.pagerDutyUrl(data.pagerDutyUrl);
             this.serviceKey(data.serviceKey);
             this.comment(data.comment);
         });
@@ -68,7 +68,7 @@ class EditPagerDutyEndpointViewModel {
             data: JSON.stringify({
                 "id": this.id(),
                 "name": this.name(),
-                "address": this.address(),
+                "pagerDutyUrl": this.pagerDutyUrl(),
                 "serviceKey": this.serviceKey(),
                 "comment": this.comment()
             }),

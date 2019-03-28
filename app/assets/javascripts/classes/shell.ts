@@ -28,8 +28,9 @@ class shell {
             { route: 'alerts', title: 'Alerts', moduleId: 'classes/alerts/AlertsViewModel', nav: false },
             { route: 'alert/edit(/:id)', title: 'Alerts', moduleId: 'classes/alerts/EditAlertViewModel', nav: false },
             { route: 'notificationgroups', title: 'Notification Groups', moduleId: 'classes/alerts/NotificationGroupsViewModel', nav: false },
+            { route: 'notificationgroup/edit(/:id)', title: 'Notification Groups', moduleId: 'classes/alerts/EditNotificationGroupViewModel', nav: false },
             { route: 'pagerdutyendpoints', title: 'PagerDuty Endpoints', moduleId: 'classes/pagerduty/PagerDutyEndpointsViewModel', nav: false },
-            { route: 'notificationgroup/edit(/:id)', title: 'Notification Groups', moduleId: 'classes/alerts/EditNotificationGroupViewModel', nav: false }
+            { route: 'pagerdutyendpoint/edit(/:id)', title: 'PagerDuty Endpoints', moduleId: 'classes/pagerduty/EditPagerDutyEndpointViewModel', nav: false }
         ]).buildNavigationModel();
 
         return router.activate();

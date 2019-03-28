@@ -54,8 +54,8 @@ GET        /v1/notification/test                controllers.NotificationControll
 # PagerDuty endpoints
 GET        /v1/pagerdutyendpoints/query         controllers.PagerDutyEndpointController.query(contains: String ?= null, limit: java.lang.Integer ?= null, offset: java.lang.Integer ?= null)
 GET        /v1/pagerdutyendpoints/:id           controllers.PagerDutyEndpointController.get(id: String)
-DELETE     /v1/pagerdutyendpoints/:id           controllers.PagerDutyEndpointController.delete(id: String)
 PUT        /v1/pagerdutyendpoints               controllers.PagerDutyEndpointController.addOrUpdate
+DELETE     /v1/pagerdutyendpoints/:id           controllers.PagerDutyEndpointController.delete(id: String)
 
 # Metrics Queries
 POST       /v1/metrics/query                    controllers.MetricsController.query()

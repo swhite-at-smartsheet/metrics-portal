@@ -41,11 +41,14 @@ public class PagerDutyEndpoint {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
+    @Column(name = "uuid")
     @PartitionKey
+    private UUID uuid;
+
     @Column(name = "name")
     private String name;
 
-    @Column(name = "pagerduty_url")
+    @Column(name = "pager_duty_url")
     private String pagerDutyUrl;
 
     @Column(name = "service_key")
@@ -79,6 +82,14 @@ public class PagerDutyEndpoint {
 
     public void setUpdatedAt(final Instant value) {
         updatedAt = value;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(final UUID value) {
+        uuid = value;
     }
 
     public String getName() {
@@ -128,6 +139,7 @@ public class PagerDutyEndpoint {
      */
     public models.internal.PagerDutyEndpoint toInternal() {
         final DefaultPagerDutyEndpoint.Builder builder = new DefaultPagerDutyEndpoint.Builder()
+                .setId(getUuid())
                 .setName(getName())
                 .setPagerDutyUrl(getPagerDutyUrl())
                 .setServiceKey(getServiceKey())

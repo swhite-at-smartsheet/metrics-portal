@@ -27,10 +27,7 @@ import models.internal.*;
 import models.internal.impl.DefaultPagerDutyEndpointQuery;
 import models.internal.impl.DefaultQueryResult;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.Spliterator;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -70,15 +67,15 @@ public class CassandraPagerDutyEndpointRepository implements PagerDutyEndpointRe
     }
 
     @Override
-    public Optional<PagerDutyEndpoint> get(final String name, final Organization organization) {
+    public Optional<PagerDutyEndpoint> get(UUID identifier, Organization organization) {
         assertIsOpen();
         LOGGER.debug()
                 .setMessage("Getting pagerduty endpoint")
-                .addData("name", name)
+                .addData("identifier", identifier)
                 .addData("organization", organization)
                 .log();
         final Mapper<models.cassandra.PagerDutyEndpoint> mapper = _mappingManager.mapper(models.cassandra.PagerDutyEndpoint.class);
-        final models.cassandra.PagerDutyEndpoint cassandraPagerDutyEndpoint = mapper.get(name);
+        final models.cassandra.PagerDutyEndpoint cassandraPagerDutyEndpoint = mapper.get(identifier);
 
         if (cassandraPagerDutyEndpoint == null) {
             return Optional.empty();
@@ -146,17 +143,17 @@ public class CassandraPagerDutyEndpointRepository implements PagerDutyEndpointRe
     }
 
     @Override
-    public int delete(final String name, final Organization organization) {
+    public int delete(UUID identifier, final Organization organization) {
         assertIsOpen();
         LOGGER.debug()
                 .setMessage("Deleting pagerduty endpoint")
-                .addData("name", name)
+                .addData("identifier", identifier)
                 .addData("organization", organization)
                 .log();
-        final Optional<PagerDutyEndpoint> pagerDutyEndpoint = get(name, organization);
+        final Optional<PagerDutyEndpoint> pagerDutyEndpoint = get(identifier, organization);
         if (pagerDutyEndpoint.isPresent()) {
             final Mapper<models.cassandra.PagerDutyEndpoint> mapper = _mappingManager.mapper(models.cassandra.PagerDutyEndpoint.class);
-            mapper.delete(name);
+            mapper.delete(identifier);
             return 1;
         }
         return 0;

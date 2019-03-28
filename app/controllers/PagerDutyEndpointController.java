@@ -75,6 +75,7 @@ public class PagerDutyEndpointController extends Controller {
      */
     public Result addOrUpdate() {
         final PagerDutyEndpoint pagerDutyEndpoint;
+        final Organization organization = _organizationProvider.getOrganization(request());
         try {
             final JsonNode jsonBody = request().body().asJson();
             if (jsonBody == null) {
@@ -91,19 +92,34 @@ public class PagerDutyEndpointController extends Controller {
                     .log();
             return badRequest("Invalid request body.");
         }
-
+        try {
+            _pagerDutyEndpointRepository.upsert(pagerDutyEndpoint, organization);
+            // CHECKSTYLE.OFF: IllegalCatch - Convert any exception to 500
+        } catch (final Exception e) {
+            // CHECKSTYLE.ON: IllegalCatch
+            LOGGER.error()
+                    .setMessage("Failed to add a pagerduty endpoint.")
+                    .setThrowable(e)
+                    .log();
+            return internalServerError();
+        }
         return noContent();
     }
 
     /**
      * Get specific pagerduty endpoint.
      *
-     * @param name The name of the endpoint.
+     * @param id The identifier of the pagerduty endpoint.
      * @return Matching alert.
      */
-    public Result get(final String name) {
-        final Organization organization = _organizationProvider.getOrganization(request());
-        final Optional<PagerDutyEndpoint> result = _pagerDutyEndpointRepository.get(name, organization);
+    public Result get(final String id) {
+        final UUID identifier;
+        try {
+            identifier = UUID.fromString(id);
+        } catch (final IllegalArgumentException e) {
+            return badRequest();
+        }       final Organization organization = _organizationProvider.getOrganization(request());
+        final Optional<PagerDutyEndpoint> result = _pagerDutyEndpointRepository.get(identifier, organization);
         if (!result.isPresent()) {
             return notFound();
         }
@@ -157,7 +173,7 @@ public class PagerDutyEndpointController extends Controller {
         } catch (final Exception e) {
             // CHECKSTYLE.ON: IllegalCatch
             LOGGER.error()
-                    .setMessage("Notification group query failed")
+                    .setMessage("Pagerduty endpoint query failed")
                     .setThrowable(e)
                     .log();
             return internalServerError();
@@ -184,12 +200,13 @@ public class PagerDutyEndpointController extends Controller {
     /**
      * Delete a specific pagerduty endpoint.
      *
-     * @param name The name of the endpoint.
+     * @param id The identifier of the pagerduty endpoint.
      * @return No content
      */
-    public Result delete(final String name) {
+    public Result delete(final String id) {
+        final UUID identifier = UUID.fromString(id);
         final Organization organization = _organizationProvider.getOrganization(request());
-        final int deleted = _pagerDutyEndpointRepository.delete(name, organization);
+        final int deleted = _pagerDutyEndpointRepository.delete(identifier, organization);
         if (deleted > 0) {
             return noContent();
         } else {

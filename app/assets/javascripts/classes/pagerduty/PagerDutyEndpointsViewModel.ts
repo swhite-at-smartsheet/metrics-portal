@@ -35,12 +35,12 @@ class PagerDutyEndpointsList extends PaginatedSearchableList<PagerDutyEndpointDa
 }
 
 class PagerDutyEndpointsViewModel {
-    endpoints: PagerDutyEndpointsList = new PagerDutyEndpointsList();
+    pagerDutyEndpoints: PagerDutyEndpointsList = new PagerDutyEndpointsList();
     deletingId: string = null;
     remove: (endpoint: PagerDutyEndpointData) => void;
 
     constructor() {
-        this.endpoints.query();
+        this.pagerDutyEndpoints.query();
         this.remove = (endpoint: PagerDutyEndpointData) => {
             this.deletingId = endpoint.id;
             console.log("set deletingId: ", this, this.deletingId);
@@ -59,7 +59,7 @@ class PagerDutyEndpointsViewModel {
             contentType: "application/json"
         }).done(() => {
             $("#confirm-delete-modal").modal('hide');
-            this.endpoints.query();
+            this.pagerDutyEndpoints.query();
             this.deletingId = null;
         });
     }

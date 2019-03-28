@@ -39,18 +39,18 @@ public interface PagerDutyEndpointRepository extends AutoCloseable {
     /**
      * Get the {@link PagerDutyEndpoint} by identifier.
      *
-     * @param name The {@link PagerDutyEndpoint} name.
+     * @param identifier The <code>PagerDutyEndpoint</code> identifier.
      * @return The matching {@link PagerDutyEndpoint} if found or <code>Optional.empty()</code>.
      */
-    Optional<PagerDutyEndpoint> get(String name, Organization organization);
+    Optional<PagerDutyEndpoint> get(UUID identifier, Organization organization);
 
     /**
      * Delete an <code>Alert</code> by identifier.
      *
-     * @param name The <code>PagerDutyEndpoint</code> identifier.
+     * @param identifier The <code>PagerDutyEndpoint</code> identifier.
      * @return 1 if it was deleted, 0 otherwise.
      */
-    int delete(String name, Organization organization);
+    int delete(UUID identifier, Organization organization);
 
     /**
      * Add a new endpoint or update an existing endpoint in the repository.

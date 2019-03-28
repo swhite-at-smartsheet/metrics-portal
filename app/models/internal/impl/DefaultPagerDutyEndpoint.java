@@ -36,6 +36,11 @@ import java.util.UUID;
 public final class DefaultPagerDutyEndpoint implements PagerDutyEndpoint {
 
     @Override
+    public UUID getId() {
+        return _id;
+    }
+
+    @Override
     public String getName() {
         return _name;
     }
@@ -59,6 +64,7 @@ public final class DefaultPagerDutyEndpoint implements PagerDutyEndpoint {
     public models.view.PagerDutyEndpoint toView() {
         final models.view.PagerDutyEndpoint viewPagerDutyEndpoint = new models.view.PagerDutyEndpoint();
         viewPagerDutyEndpoint.setName(_name);
+        viewPagerDutyEndpoint.setId(_id.toString());
         viewPagerDutyEndpoint.setPagerDutyUrl(_pagerDutyUrl);
         viewPagerDutyEndpoint.setServiceKey(_serviceKey);
         viewPagerDutyEndpoint.setComment(_comment);

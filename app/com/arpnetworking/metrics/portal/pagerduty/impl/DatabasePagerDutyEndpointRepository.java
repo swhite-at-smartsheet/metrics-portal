@@ -32,6 +32,7 @@ import javax.persistence.PersistenceException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -86,16 +87,16 @@ public class DatabasePagerDutyEndpointRepository implements PagerDutyEndpointRep
     }
 
     @Override
-    public Optional<PagerDutyEndpoint> get(final String name, Organization organization) {
+    public Optional<PagerDutyEndpoint> get(final UUID identifier, final Organization organization) {
         LOGGER.debug()
                 .setMessage("Getting pagerduty endpoint")
-                .addData("identifier", name)
+                .addData("identifier", identifier)
                 .addData("organization", organization)
                 .log();
 
         final models.ebean.PagerDutyEndpoint pagerDutyEndpoint = Ebean.find(models.ebean.PagerDutyEndpoint.class)
                 .where()
-                .eq("name", name)
+                .eq("uuid", identifier)
                 .eq("organization.uuid", organization.getId())
                 .findOne();
         if (pagerDutyEndpoint == null) {
@@ -143,7 +144,7 @@ public class DatabasePagerDutyEndpointRepository implements PagerDutyEndpointRep
         try (Transaction transaction = Ebean.beginTransaction()) {
             models.ebean.PagerDutyEndpoint ebeanPagerDutyEndpoint = Ebean.find(models.ebean.PagerDutyEndpoint.class)
                     .where()
-                    .eq("name", pagerDutyEndpoint.getName())
+                    .eq("uuid", pagerDutyEndpoint.getId())
                     .eq("organization.uuid", organization.getId())
                     .findOne();
             boolean isCreated = false;
@@ -152,12 +153,13 @@ public class DatabasePagerDutyEndpointRepository implements PagerDutyEndpointRep
                 isCreated = true;
             }
 
+            ebeanPagerDutyEndpoint.setUuid(pagerDutyEndpoint.getId());
             ebeanPagerDutyEndpoint.setName(pagerDutyEndpoint.getName());
             ebeanPagerDutyEndpoint.setPagerDutyUrl(pagerDutyEndpoint.getPagerDutyUrl());
             ebeanPagerDutyEndpoint.setServiceKey(pagerDutyEndpoint.getServiceKey());
             ebeanPagerDutyEndpoint.setComment(pagerDutyEndpoint.getComment());
             ebeanPagerDutyEndpoint.setOrganization(models.ebean.Organization.findByOrganization(organization));
-
+            _pagerDutyEndpointQueryGenerator.savePagerDutyEndpoint(ebeanPagerDutyEndpoint);
             transaction.commit();
 
             LOGGER.info()
@@ -178,15 +180,15 @@ public class DatabasePagerDutyEndpointRepository implements PagerDutyEndpointRep
     }
 
     @Override
-    public int delete(final String name, Organization organization) {
+    public int delete(final UUID identifier, final Organization organization) {
         LOGGER.debug()
                 .setMessage("Deleting pagerduty endpoint")
-                .addData("name", name)
+                .addData("identifier", identifier)
                 .addData("organization", organization)
                 .log();
         return Ebean.find(models.ebean.PagerDutyEndpoint.class)
                 .where()
-                .eq("name", name)
+                .eq("uuid", identifier)
                 .eq("organization.uuid", organization.getId())
                 .delete();
     }

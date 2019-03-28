@@ -35,6 +35,11 @@ import java.util.UUID;
 @Entity
 @Table(name = "pager_duty_endpoints", schema = "portal")
 public class PagerDutyEndpoint {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
+
     @Version
     @Column(name = "version")
     private Long version;
@@ -47,11 +52,13 @@ public class PagerDutyEndpoint {
     @Column(name = "updated_at")
     private Timestamp updatedAt;
 
-    @Id
+    @Column(name = "uuid")
+    private UUID uuid;
+
     @Column(name = "name")
     private String name;
 
-    @Column(name = "pagerduty_url")
+    @Column(name = "pager_duty_url")
     private String pagerDutyUrl;
 
     @Column(name = "service_key")
@@ -63,6 +70,14 @@ public class PagerDutyEndpoint {
     @ManyToOne(optional = false)
     @JoinColumn(name = "organization")
     private Organization organization;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public Long getVersion() {
         return version;
@@ -86,6 +101,14 @@ public class PagerDutyEndpoint {
 
     public void setUpdatedAt(final Timestamp value) {
         updatedAt = value;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(final UUID value) {
+        uuid = value;
     }
 
     public String getName() {
@@ -135,6 +158,7 @@ public class PagerDutyEndpoint {
      */
     public models.internal.PagerDutyEndpoint toInternal() {
         final DefaultPagerDutyEndpoint.Builder builder = new DefaultPagerDutyEndpoint.Builder()
+                .setId(getUuid())
                 .setName(getName())
                 .setPagerDutyUrl(getPagerDutyUrl())
                 .setServiceKey(getServiceKey())

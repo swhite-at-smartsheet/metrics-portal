@@ -15,8 +15,6 @@
  */
 package models.internal;
 
-import org.joda.time.Period;
-
 import java.util.UUID;
 
 /**
@@ -28,6 +26,13 @@ public interface PagerDutyEndpoint {
 
     /**
      * The unique identifier of the endpoint.
+     *
+     * @return The unique identifier of the endpoint.
+     */
+    UUID getId();
+
+    /**
+     * The name of the endpoint.
      *
      * @return The name of the endpoint.
      */
