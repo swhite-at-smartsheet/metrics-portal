@@ -87,7 +87,7 @@ interface ResponseCallback {
 class EditAlertViewModel {
     id = ko.observable<string>("");
     name = ko.observable<string>("");
-    query = ko.observable<string>("select my_metric group by cluster | avg | threshold threshold=10 operator=GREATER_THAN").extend({ rateLimit: { timeout: 500, method: "notifyWhenChangesStop" } });
+    query = ko.observable<string>("select 'cpu/idle' group by cluster | avg | threshold threshold=11 operator=LESS_THAN").extend({ rateLimit: { timeout: 500, method: "notifyWhenChangesStop" } });
     period = ko.observable<string>("PT1M");
     comment = ko.observable<string>("");
     container: HTMLElement;

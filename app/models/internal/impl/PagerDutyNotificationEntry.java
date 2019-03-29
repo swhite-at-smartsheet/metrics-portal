@@ -21,6 +21,7 @@ import akka.http.javadsl.model.ContentTypes;
 import akka.http.javadsl.model.HttpEntities;
 import akka.http.javadsl.model.HttpRequest;
 import com.arpnetworking.commons.builder.OvalBuilder;
+import com.arpnetworking.metrics.portal.pagerduty.PagerDutyEndpointRepository;
 import com.arpnetworking.mql.grammar.AlertTrigger;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
@@ -30,6 +31,7 @@ import com.google.inject.Injector;
 import com.typesafe.config.Config;
 import models.internal.Alert;
 import models.internal.NotificationEntry;
+import models.internal.PagerDutyEndpoint;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 
@@ -48,6 +50,11 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
     public CompletionStage<Void> notifyRecipient(final Alert alert, final AlertTrigger trigger, final Injector injector) {
         LOGGER.debug().setMessage("executing pagerduty call").log();
         final Config typesafeConfig = injector.getInstance(Config.class);
+        final PagerDutyEndpointRepository pagerDutyEndpointRepository = injector.getInstance(PagerDutyEndpointRepository.class);
+        final PagerDutyEndpoint pagerDutyEndpoint = pagerDutyEndpointRepository.getByName
+        String pagerDutyNotificationName = getAddress(); // FIXME code smell...
+
+        // TODO lookup endpoint record from DB, get url and service key...
         String pagerDutyEndpoint = typesafeConfig.getString("pagerDuty.uri");
 
         try {
