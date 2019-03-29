@@ -90,4 +90,11 @@ public interface NotificationRepository {
      * @param recipient The recipient
      */
     void removeRecipientFromNotificationGroup(NotificationGroup group, Organization organization, NotificationEntry recipient);
+
+    /**
+     * Delete all recipients with a matching value.
+     *
+     * @param value The value string to match.
+     */
+    void deleteRecipientsMatchingValue(String value);
 }

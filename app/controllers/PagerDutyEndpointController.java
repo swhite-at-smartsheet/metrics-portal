@@ -15,10 +15,7 @@
  */
 package controllers;
 
-import akka.actor.ActorRef;
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
-import com.arpnetworking.metrics.portal.alerts.AlertRepository;
-import com.arpnetworking.metrics.portal.alerts.impl.AlertExecutor;
 import com.arpnetworking.metrics.portal.notifications.NotificationRepository;
 import com.arpnetworking.metrics.portal.organizations.OrganizationProvider;
 import com.arpnetworking.metrics.portal.pagerduty.PagerDutyEndpointRepository;
@@ -32,14 +29,16 @@ import com.google.common.collect.Maps;
 import com.google.common.net.HttpHeaders;
 import com.google.inject.Inject;
 import com.typesafe.config.Config;
-import models.internal.*;
+import models.internal.Organization;
+import models.internal.PagerDutyEndpoint;
+import models.internal.PagerDutyEndpointQuery;
+import models.internal.QueryResult;
 import models.view.PagedContainer;
 import models.view.Pagination;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 
-import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.Map;
 import java.util.Optional;
@@ -64,8 +63,9 @@ public class PagerDutyEndpointController extends Controller {
     public PagerDutyEndpointController(
             final Config configuration,
             final PagerDutyEndpointRepository pagerDutyEndpointRepository,
+            final NotificationRepository notificationRepository,
             final OrganizationProvider organizationProvider) {
-        this(configuration.getInt("pagerDutyEndpoints.limit"), pagerDutyEndpointRepository, organizationProvider);
+        this(configuration.getInt("pagerDutyEndpoints.limit"), pagerDutyEndpointRepository, notificationRepository, organizationProvider);
     }
 
     /**
@@ -206,6 +206,12 @@ public class PagerDutyEndpointController extends Controller {
     public Result delete(final String id) {
         final UUID identifier = UUID.fromString(id);
         final Organization organization = _organizationProvider.getOrganization(request());
+
+        final Optional<PagerDutyEndpoint> pde = _pagerDutyEndpointRepository.get(identifier, organization);
+        if (pde.isPresent()) {
+            // found a match - remove the dependencies
+            _notificationRepository.deleteRecipientsMatchingValue(pde.get().getName());
+        }
         final int deleted = _pagerDutyEndpointRepository.delete(identifier, organization);
         if (deleted > 0) {
             return noContent();
@@ -217,14 +223,17 @@ public class PagerDutyEndpointController extends Controller {
     private PagerDutyEndpointController(
             final int maxLimit,
             final PagerDutyEndpointRepository pagerDutyEndpointRepository,
+            final NotificationRepository notificationRepository,
             final OrganizationProvider organizationProvider) {
         _maxLimit = maxLimit;
         _pagerDutyEndpointRepository = pagerDutyEndpointRepository;
+        _notificationRepository = notificationRepository;
         _organizationProvider = organizationProvider;
     }
 
     private final int _maxLimit;
     private final PagerDutyEndpointRepository _pagerDutyEndpointRepository;
+    private final NotificationRepository _notificationRepository;
     private final OrganizationProvider _organizationProvider;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PagerDutyEndpointController.class);

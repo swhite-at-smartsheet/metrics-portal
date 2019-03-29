@@ -20,28 +20,24 @@ import com.arpnetworking.metrics.portal.notifications.NotificationRepository;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.querybuilder.Delete;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.MappingManager;
 import com.datastax.driver.mapping.Result;
 import com.google.inject.Inject;
 import models.cassandra.NotificationRecipient;
-import models.internal.NotificationEntry;
-import models.internal.NotificationGroup;
-import models.internal.NotificationGroupQuery;
-import models.internal.Organization;
-import models.internal.QueryResult;
+import models.internal.*;
 import models.internal.impl.DefaultNotificationGroupQuery;
 import models.internal.impl.DefaultQueryResult;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.Spliterator;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 
 /**
  * A notification repository backed by cassandra.
@@ -138,7 +134,7 @@ public class CassandraNotificationRepository implements NotificationRepository {
         assertIsOpen();
         LOGGER.debug()
                 .setMessage("Creating notification group")
-                .addData("notificationGroiup", group)
+                .addData("notificationGroup", group)
                 .addData("organization", organization)
                 .log();
 
@@ -210,7 +206,20 @@ public class CassandraNotificationRepository implements NotificationRepository {
             }
             _mappingManager.mapper(models.cassandra.NotificationGroup.class).save(notificationGroup);
         });
+    }
 
+    @Override
+    public void deleteRecipientsMatchingValue(final String value) {
+        assertIsOpen();
+        LOGGER.debug()
+                .setMessage("Deleting all matching recipients")
+                .addData("value", value)
+                .log();
+
+        final Mapper<models.cassandra.NotificationRecipient> mapper = _mappingManager.mapper(models.cassandra.NotificationRecipient.class);
+        Delete delete = QueryBuilder.delete().from("PORTAL.NOTIFICATION_RECIPIENT");
+        delete.where(eq("value", value));
+        _cassandraSession.execute(delete);
     }
 
     private void assertIsOpen() {
