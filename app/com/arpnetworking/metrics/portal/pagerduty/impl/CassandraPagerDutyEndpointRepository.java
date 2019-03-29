@@ -85,6 +85,24 @@ public class CassandraPagerDutyEndpointRepository implements PagerDutyEndpointRe
     }
 
     @Override
+    public Optional<PagerDutyEndpoint> getByName(String name, Organization organization) {
+        assertIsOpen();
+        LOGGER.debug()
+                .setMessage("Getting pagerduty endpoint")
+                .addData("name", name)
+                .addData("organization", organization)
+                .log();
+        final Mapper<models.cassandra.PagerDutyEndpoint> mapper = _mappingManager.mapper(models.cassandra.PagerDutyEndpoint.class);
+        final models.cassandra.PagerDutyEndpoint cassandraPagerDutyEndpoint = mapper.get(name);
+
+        if (cassandraPagerDutyEndpoint == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(cassandraPagerDutyEndpoint.toInternal());
+    }
+
+    @Override
     public void upsert(final PagerDutyEndpoint pagerDutyEndpoint, final Organization organization) {
         assertIsOpen();
         LOGGER.debug()

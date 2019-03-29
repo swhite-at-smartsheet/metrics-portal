@@ -106,6 +106,25 @@ public class DatabasePagerDutyEndpointRepository implements PagerDutyEndpointRep
     }
 
     @Override
+    public Optional<PagerDutyEndpoint> getByName(final String name, final Organization organization) {
+        LOGGER.debug()
+                .setMessage("Getting pagerduty endpoint")
+                .addData("name", name)
+                .addData("organization", organization)
+                .log();
+
+        final models.ebean.PagerDutyEndpoint pagerDutyEndpoint = Ebean.find(models.ebean.PagerDutyEndpoint.class)
+                .where()
+                .eq("name", name)
+                .eq("organization.uuid", organization.getId())
+                .findOne();
+        if (pagerDutyEndpoint == null) {
+            return Optional.empty();
+        }
+        return Optional.of(pagerDutyEndpoint.toInternal());
+    }
+
+    @Override
     public PagerDutyEndpointQuery createQuery(final Organization organization) {
         assertIsOpen();
         LOGGER.debug()

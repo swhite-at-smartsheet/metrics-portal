@@ -37,6 +37,8 @@ import net.sf.oval.constraint.NotNull;
 
 import java.net.URI;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
@@ -51,18 +53,27 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
         LOGGER.debug().setMessage("executing pagerduty call").log();
         final Config typesafeConfig = injector.getInstance(Config.class);
         final PagerDutyEndpointRepository pagerDutyEndpointRepository = injector.getInstance(PagerDutyEndpointRepository.class);
-        final PagerDutyEndpoint pagerDutyEndpoint = pagerDutyEndpointRepository.getByName
         String pagerDutyNotificationName = getAddress(); // FIXME code smell...
+        final Optional<PagerDutyEndpoint> pde = pagerDutyEndpointRepository.getByName(getAddress(), alert.getOrganization());
+        if (!pde.isPresent()) {
+            String error = "notifyRecipient() error: pagerduty endpoint '" + pagerDutyNotificationName + "' not found in database";
+            LOGGER.error(error);
+            final CompletableFuture<Void> future = new CompletableFuture<>();
+            future.completeExceptionally(new Throwable(error));
+            return future;
+        }
 
         // TODO lookup endpoint record from DB, get url and service key...
-        String pagerDutyEndpoint = typesafeConfig.getString("pagerDuty.uri");
+        String pagerDutyUrl = pde.get().getPagerDutyUrl();
+        String pagerDutyServiceKey = pde.get().getServiceKey();
 
         try {
-            final URI pagerDutyURI = new URI(pagerDutyEndpoint);
+            final String baseUrl = typesafeConfig.getString("alerts.baseUrl");
+            final URI pagerDutyURI = new URI(pagerDutyUrl);
             final ActorSystem actorSystem = injector.getInstance(ActorSystem.class);
             final ObjectMapper mapper = injector.getInstance(ObjectMapper.class);
             final Http http = Http.get(actorSystem);
-            final PagerDutyAlert pagerDutyAlert = createPagerDutyAlert(typesafeConfig, alert, trigger);
+            final PagerDutyAlert pagerDutyAlert = createPagerDutyAlert(baseUrl, pagerDutyUrl, pagerDutyServiceKey, alert, trigger);
 
             return http
                     .singleRequest(
@@ -75,16 +86,16 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
                         return null;
                     });
         } catch (final Exception e) {
-            LOGGER.error("notifyException() exception: " + e);
+            LOGGER.error("notifyRecipient() exception: " + e);
+            final CompletableFuture<Void> future = new CompletableFuture<>();
+            future.completeExceptionally(e);
+            return future;
         }
-        return null;
     }
 
-    private PagerDutyAlert createPagerDutyAlert(final Config config, final Alert alert, final AlertTrigger alertTrigger) {
+    private PagerDutyAlert createPagerDutyAlert(final String baseUrl, final String pagerDutyUrl, final String pagerDutyServiceKey, final Alert alert, final AlertTrigger alertTrigger) {
         final PagerDutyAlert pagerDutyAlert = new PagerDutyAlert();
-        final String pagerDutyServiceKey = config.getString("pagerDuty.serviceKey");
         final String subject = String.format("Alert '%s' on %s in alarm ", alert.getName(), getGroupByString(alertTrigger));
-        final String baseUrl = config.getString("alerts.baseUrl");
         final String alertUrl = URI.create(baseUrl).resolve("/#alert/edit/" + alert.getId()).toString();
 
         PagerDutyContext[] contexts = { new PagerDutyContext("link", alertUrl, "View the alert in M-Portal") };

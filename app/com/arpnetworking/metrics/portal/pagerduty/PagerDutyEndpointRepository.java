@@ -45,6 +45,14 @@ public interface PagerDutyEndpointRepository extends AutoCloseable {
     Optional<PagerDutyEndpoint> get(UUID identifier, Organization organization);
 
     /**
+     * Get the {@link PagerDutyEndpoint} by name.
+     *
+     * @param name The <code>PagerDutyEndpoint</code> name.
+     * @return The matching {@link PagerDutyEndpoint} if found or <code>Optional.empty()</code>.
+     */
+    Optional<PagerDutyEndpoint> getByName(String name, Organization organization);
+
+    /**
      * Delete an <code>Alert</code> by identifier.
      *
      * @param identifier The <code>PagerDutyEndpoint</code> identifier.
