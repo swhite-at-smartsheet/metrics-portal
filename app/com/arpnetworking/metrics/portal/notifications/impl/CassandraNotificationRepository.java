@@ -27,11 +27,19 @@ import com.datastax.driver.mapping.MappingManager;
 import com.datastax.driver.mapping.Result;
 import com.google.inject.Inject;
 import models.cassandra.NotificationRecipient;
-import models.internal.*;
+import models.internal.NotificationEntry;
+import models.internal.NotificationGroup;
+import models.internal.NotificationGroupQuery;
+import models.internal.Organization;
+import models.internal.QueryResult;
 import models.internal.impl.DefaultNotificationGroupQuery;
 import models.internal.impl.DefaultQueryResult;
 
-import java.util.*;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.Spliterator;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -215,8 +223,7 @@ public class CassandraNotificationRepository implements NotificationRepository {
                 .setMessage("Deleting all matching recipients")
                 .addData("value", value)
                 .log();
-
-        final Mapper<models.cassandra.NotificationRecipient> mapper = _mappingManager.mapper(models.cassandra.NotificationRecipient.class);
+        // Looking through the Cassandra docs and examples, I couldn't find any more elegant way to delete these entries...
         Delete delete = QueryBuilder.delete().from("PORTAL.NOTIFICATION_RECIPIENT");
         delete.where(eq("value", value));
         _cassandraSession.execute(delete);

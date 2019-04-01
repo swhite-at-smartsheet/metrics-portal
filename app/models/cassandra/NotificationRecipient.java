@@ -33,6 +33,7 @@ import models.internal.impl.PagerDutyNotificationEntry;
         @JsonSubTypes.Type(name = "webhook", value = WebHookNotificationRecipient.class),
         @JsonSubTypes.Type(name = "pagerduty", value = PagerDutyNotificationRecipient.class)
 })
+
 public interface NotificationRecipient {
     /**
      * Converts this model to an internal model.

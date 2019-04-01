@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Groupon.com
+ * Copyright 2019 Smartsheet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 
 import ko = require('knockout');
-import Quantity = require('../Quantity');
 
 class PagerDutyEndpointData {
     id: string;

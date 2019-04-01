@@ -18,11 +18,9 @@ package models.internal.impl;
 import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.ImmutableMap;
-import models.internal.*;
+import models.internal.PagerDutyEndpoint;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
-import org.joda.time.Period;
 
 import java.util.Objects;
 import java.util.UUID;

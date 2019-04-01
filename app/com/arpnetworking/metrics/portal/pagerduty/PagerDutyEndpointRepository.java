@@ -1,5 +1,5 @@
-/**
- * Copyright 2017 Smartsheet
+/*
+ * Copyright 2019 Smartsheet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,11 @@
  */
 package com.arpnetworking.metrics.portal.pagerduty;
 
-import models.internal.*;
+
+import models.internal.Organization;
+import models.internal.PagerDutyEndpoint;
+import models.internal.PagerDutyEndpointQuery;
+import models.internal.QueryResult;
 
 import java.util.Optional;
 import java.util.UUID;

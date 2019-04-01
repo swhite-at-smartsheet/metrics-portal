@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Groupon.com
+ * Copyright 2019 Smartsheet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,9 +155,7 @@ public class PagerDutyEndpointController extends Controller {
 
         // Build conditions map
         final Map<String, String> conditions = Maps.newHashMap();
-        if (argContains.isPresent()) {
-            conditions.put("contains", argContains.get());
-        }
+        argContains.ifPresent(val -> conditions.put("contains", val));
 
         // Build a endpoint repository query
         final PagerDutyEndpointQuery query = _pagerDutyEndpointRepository.createQuery(_organizationProvider.getOrganization(request()))
@@ -208,10 +206,9 @@ public class PagerDutyEndpointController extends Controller {
         final Organization organization = _organizationProvider.getOrganization(request());
 
         final Optional<PagerDutyEndpoint> pde = _pagerDutyEndpointRepository.get(identifier, organization);
-        if (pde.isPresent()) {
-            // found a match - remove the dependencies
-            _notificationRepository.deleteRecipientsMatchingValue(pde.get().getName());
-        }
+        // If we found a match, remove the dependencies
+        pde.ifPresent(val -> _notificationRepository.deleteRecipientsMatchingValue(val.getName()));
+
         final int deleted = _pagerDutyEndpointRepository.delete(identifier, organization);
         if (deleted > 0) {
             return noContent();

@@ -468,7 +468,6 @@ public class MainModule extends AbstractModule {
         private static final String INDEXER_ROLE = "host_indexer";
     }
 
-
     private static final class AlertExecutionSchedulerProvider implements Provider<ActorRef> {
         @Inject
         AlertExecutionSchedulerProvider(

@@ -95,6 +95,7 @@ class EditAlertViewModel {
     queryWarnings = ko.observableArray<string>();
     notificationGroup = ko.observable<NotificationGroup>();
     dateRange = ko.observable<any[]>([moment().subtract(2, 'hours'), moment()]);
+
     notificationGroupAutocompleteOpts: any = {
         source: {
             source: (request: string, response: ResponseCallback) => {
@@ -110,6 +111,7 @@ class EditAlertViewModel {
             strict: true
         }
     };
+
     formattedDateRange = ko.computed(() => {
         let range = this.dateRange();
         let start = range[0];

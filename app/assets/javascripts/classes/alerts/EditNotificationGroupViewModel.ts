@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Smartsheet.com
+ * Copyright 2019 Smartsheet.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,11 @@ class EditNotificationGroupViewModel {
     addAddress = ko.observable<string>();
     addPagerDutyEndpoint = ko.observable<PagerDutyEndpointData>();
     initialCreate: boolean;
+
     addRecipientTemplate = ko.computed<string>(() => {
         return "template-add-recipient-" + this.addType();
     });
+
     pagerDutyEndpointAutocompleteOpts: any = {
         source: {
             source: (request: string, response: ResponseCallback) => {

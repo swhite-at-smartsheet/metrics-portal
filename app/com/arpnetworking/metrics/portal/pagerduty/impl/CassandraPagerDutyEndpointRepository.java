@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Smartsheet.com
+ * Copyright 2019 Smartsheet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,10 @@ import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.MappingManager;
 import com.datastax.driver.mapping.Result;
 import com.google.inject.Inject;
-import models.internal.*;
+import models.internal.Organization;
+import models.internal.PagerDutyEndpoint;
+import models.internal.PagerDutyEndpointQuery;
+import models.internal.QueryResult;
 import models.internal.impl.DefaultPagerDutyEndpointQuery;
 import models.internal.impl.DefaultQueryResult;
 
@@ -154,7 +157,7 @@ public class CassandraPagerDutyEndpointRepository implements PagerDutyEndpointRe
         }
 
         final List<PagerDutyEndpoint> endpoints = endpointStream
-                .map(endpoint -> endpoint.toInternal())
+                .map(models.cassandra.PagerDutyEndpoint::toInternal)
                 .collect(Collectors.toList());
         final List<PagerDutyEndpoint> paginated = endpoints.stream().skip(start).limit(query.getLimit()).collect(Collectors.toList());
         return new DefaultQueryResult<>(paginated, endpoints.size());

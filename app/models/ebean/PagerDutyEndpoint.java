@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Groupon.com
+ * Copyright 2019 Smartsheet.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package models.ebean;
 
 import io.ebean.annotation.CreatedTimestamp;
 import io.ebean.annotation.UpdatedTimestamp;
-import models.internal.MetricsSoftwareState;
-import models.internal.impl.DefaultHost;
 import models.internal.impl.DefaultPagerDutyEndpoint;
 
 import javax.persistence.*;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Smartsheet.com
+ * Copyright 2019 Smartsheet.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-import AlertData = require('../alerts/AlertData');
-import {NotificationGroup} from '../alerts/NotificationGroup';
 import ko = require('knockout');
 import $ = require('jquery');
 import uuid = require('../Uuid');
-import csrf from '../Csrf';
-import * as d3 from 'd3';
-import jqXHR = JQuery.jqXHR;
 import PagerDutyEndpointData = require("./PagerDutyEndpointData");
+import csrf from '../Csrf';
 
 
 class EditPagerDutyEndpointViewModel {
@@ -32,11 +28,6 @@ class EditPagerDutyEndpointViewModel {
     serviceKey = ko.observable<string>("");
     comment = ko.observable<string>("");
     container: HTMLElement;
-
-    // constructor() {
-    //     // this.formattedQuery.subscribe((newValue) => this.queryChanged(newValue));
-    //     // this.notificationGroup.subscribe((newValue) => console.log(newValue));
-    // }
 
     activate(id: string) {
         if (id != null) {
