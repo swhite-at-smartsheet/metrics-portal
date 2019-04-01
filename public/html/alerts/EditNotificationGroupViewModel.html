@@ -70,8 +70,8 @@
     </li>
 </script>
 <script type="text/html" id="template-add-recipient-pagerduty">
-    <label for="pagerdutyNameInput">Endpoint Name</label>
-    <input class="form-control" data-bind="value: addAddress" type="text" id="pagerdutyNameInput" placeholder="Name">
+    <label for="pagerDutyNameInput">Endpoint Name</label>
+    <input class="form-control" data-bind="typeahead: {options: pagerDutyEndpointAutocompleteOpts, value: addPagerDutyEndpoint}" id="pagerDutyNameInput" type="text" placeholder="Notify">
 </script>
 <script type="text/html" id="template-recipient-pagerduty">
     <li>

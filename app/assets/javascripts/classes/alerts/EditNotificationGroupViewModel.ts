@@ -19,7 +19,7 @@ import ko = require('knockout');
 import $ = require('jquery');
 import uuid = require('../Uuid');
 import csrf from '../Csrf'
-
+import PagerDutyEndpointData = require("../pagerduty/PagerDutyEndpointData");
 
 interface ResponseCallback {
     (response: any[]): void;
@@ -30,10 +30,26 @@ class EditNotificationGroupViewModel {
     recipients = ko.observableArray<Recipient>();
     addType = ko.observable<string>("email");
     addAddress = ko.observable<string>();
+    addPagerDutyEndpoint = ko.observable<PagerDutyEndpointData>();
     initialCreate: boolean;
     addRecipientTemplate = ko.computed<string>(() => {
         return "template-add-recipient-" + this.addType();
     });
+    pagerDutyEndpointAutocompleteOpts: any = {
+        source: {
+            source: (request: string, response: ResponseCallback) => {
+                $.getJSON("v1/pagerdutyendpoints/query", {contains: request, limit: 10}, (result:{data: PagerDutyEndpointData[]}) => {
+                    response(result.data);
+                });
+            },
+            display: "name"
+        },
+        opt: {
+            minLength: 2,
+            delay: 500,
+            strict: true
+        }
+    };
 
     activate(id: string) {
         if (id != null) {
@@ -95,7 +111,7 @@ class EditNotificationGroupViewModel {
             recipient.address = this.addAddress();
         } else if (this.addType() === "pagerduty") {
             recipient = new PagerDutyRecipient();
-            recipient.address = this.addAddress();
+            recipient.address = this.addPagerDutyEndpoint().name;
         }
         let saveRecipient = () => {$.ajax({
             type: "PUT",
