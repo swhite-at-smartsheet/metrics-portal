@@ -53,8 +53,10 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
         LOGGER.debug().setMessage("executing pagerduty call").log();
         final Config typesafeConfig = injector.getInstance(Config.class);
         final PagerDutyEndpointRepository pagerDutyEndpointRepository = injector.getInstance(PagerDutyEndpointRepository.class);
-        String pagerDutyNotificationName = getAddress(); // FIXME code smell...
-        final Optional<PagerDutyEndpoint> pde = pagerDutyEndpointRepository.getByName(getAddress(), alert.getOrganization());
+        // This sort-of overloads the address field to store the pagerduty endpoint name, but I didn't want to add a new field
+        //
+        String pagerDutyNotificationName = _endpointName; // FIXME code smell...
+        final Optional<PagerDutyEndpoint> pde = pagerDutyEndpointRepository.getByName(getEndpointName(), alert.getOrganization());
         if (!pde.isPresent()) {
             String error = "notifyRecipient() error: pagerduty endpoint '" + pagerDutyNotificationName + "' not found in database";
             LOGGER.error(error);
@@ -63,7 +65,6 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
             return future;
         }
 
-        // TODO lookup endpoint record from DB, get url and service key...
         String pagerDutyUrl = pde.get().getPagerDutyUrl();
         String pagerDutyServiceKey = pde.get().getServiceKey();
 
@@ -114,13 +115,13 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
     @Override
     public models.view.NotificationEntry toView() {
         final models.view.PagerDutyNotificationEntry view = new models.view.PagerDutyNotificationEntry();
-        view.setAddress(_address);
+        view.setEndpointName(_endpointName);
         return view;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_address);
+        return Objects.hash(_endpointName);
     }
 
     @Override
@@ -132,15 +133,15 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
             return false;
         }
         final PagerDutyNotificationEntry other = (PagerDutyNotificationEntry) o;
-        return Objects.equals(_address, other._address);
+        return Objects.equals(_endpointName, other._endpointName);
     }
 
-    public String getAddress() {
-        return _address;
+    public String getEndpointName() {
+        return _endpointName;
     }
 
     private PagerDutyNotificationEntry(final Builder builder) {
-        _address = builder._address;
+        _endpointName = builder._endpointName;
     }
 
     private String getGroupByString(final AlertTrigger trigger) {
@@ -151,7 +152,7 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
                 .collect(Collectors.joining(", "));
     }
 
-    private final String _address;
+    private final String _endpointName;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PagerDutyNotificationEntry.class);
 
@@ -174,13 +175,13 @@ public final class PagerDutyNotificationEntry implements NotificationEntry {
          * @param value The email address.
          * @return This instance of {@link PagerDutyNotificationEntry.Builder}.
          */
-        public PagerDutyNotificationEntry.Builder setAddress(final String value) {
-            _address = value;
+        public PagerDutyNotificationEntry.Builder setEndpointName(final String value) {
+            _endpointName = value;
             return this;
         }
         @NotNull
         @NotEmpty
-        private String _address;
+        private String _endpointName;
     }
 
     /**

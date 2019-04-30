@@ -34,20 +34,20 @@ import java.util.Objects;
 @DiscriminatorValue("pagerduty")
 public class PagerDutyNotificationRecipient extends NotificationRecipient {
     @Column(name = "value")
-    private String _address;
+    private String _endpointName;
 
     public String getAddress() {
-        return _address;
+        return _endpointName;
     }
 
-    public void setAddress(final String address) {
-        _address = address;
+    public void setEndpointName(final String endpointName) {
+        _endpointName = endpointName;
     }
 
     @Override
     public NotificationEntry toInternal() {
         return new PagerDutyNotificationEntry.Builder()
-                .setAddress(_address)
+                .setEndpointName(_endpointName)
                 .build();
     }
 
@@ -60,13 +60,13 @@ public class PagerDutyNotificationRecipient extends NotificationRecipient {
             return false;
         }
         final PagerDutyNotificationRecipient that = (PagerDutyNotificationRecipient) o;
-        return Objects.equals(_address, that._address);
+        return Objects.equals(_endpointName, that._endpointName);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(_address);
+        return Objects.hash(_endpointName);
     }
 
     @SuppressWarnings("unused")

@@ -295,7 +295,7 @@ public class DatabaseNotificationRepository implements NotificationRepository {
         try (Transaction transaction = Ebean.beginTransaction()) {
             List<NotificationRecipient> recipients = Ebean.find(models.ebean.NotificationRecipient.class)
                     .where()
-                    .eq("value", value) // FIXME unindexed query
+                    .eq("value", value) // This is an unindexed query, but the consequences seem low.
                     .findList();
             Ebean.deleteAll(recipients);
             transaction.commit();

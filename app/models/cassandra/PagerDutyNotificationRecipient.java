@@ -26,18 +26,18 @@ import java.util.Objects;
  * @author Sheldon White (sheldon.white at smartsheet dot com)
  */
 public class PagerDutyNotificationRecipient implements NotificationRecipient {
-    public String getAddress() {
-        return _address;
+    public String getEndpointName() {
+        return _endpointName;
     }
 
-    public void setAddress(final String address) {
-        _address = address;
+    public void setEndpointName(final String endpointName) {
+        _endpointName = endpointName;
     }
 
     @Override
     public NotificationEntry toInternal() {
         return new PagerDutyNotificationEntry.Builder()
-                .setAddress(_address)
+                .setEndpointName(_endpointName)
                 .build();
     }
 
@@ -50,14 +50,13 @@ public class PagerDutyNotificationRecipient implements NotificationRecipient {
             return false;
         }
         final PagerDutyNotificationRecipient that = (PagerDutyNotificationRecipient) o;
-        return Objects.equals(_address, that._address);
+        return Objects.equals(_endpointName, that._endpointName);
     }
 
     @Override
     public int hashCode() {
-
-        return Objects.hash(_address);
+        return Objects.hash(_endpointName);
     }
 
-    private String _address;
+    private String _endpointName;
 }

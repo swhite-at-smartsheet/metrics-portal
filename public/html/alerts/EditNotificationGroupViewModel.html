@@ -71,11 +71,11 @@
 </script>
 <script type="text/html" id="template-add-recipient-pagerduty">
     <label for="pagerDutyNameInput">Endpoint Name</label>
-    <input class="form-control" data-bind="typeahead: {options: pagerDutyEndpointAutocompleteOpts, value: addPagerDutyEndpoint}" id="pagerDutyNameInput" type="text" placeholder="Notify">
+    <input class="form-control" data-bind="typeahead: {options: pagerDutyEndpointAutocompleteOpts, value: addEndpointName}" id="pagerDutyNameInput" type="text" placeholder="Notify">
 </script>
 <script type="text/html" id="template-recipient-pagerduty">
     <li>
-        <i class="fa fa-pager" aria-hidden="true"></i> <span data-bind="text: address"></span>
+        <i class="fa fa-pager" aria-hidden="true"></i> <span data-bind="text: endpointName"></span>
         <a href="#" data-bind="click: $root.removeRecipient.bind($root)"><i class="fa fa-trash-o"></i></a>
     </li>
 </script>

@@ -30,7 +30,7 @@ class EditNotificationGroupViewModel {
     recipients = ko.observableArray<Recipient>();
     addType = ko.observable<string>("email");
     addAddress = ko.observable<string>();
-    addPagerDutyEndpoint = ko.observable<PagerDutyEndpointData>();
+    addEndpointName = ko.observable<PagerDutyEndpointData>();
     initialCreate: boolean;
 
     addRecipientTemplate = ko.computed<string>(() => {
@@ -113,7 +113,7 @@ class EditNotificationGroupViewModel {
             recipient.address = this.addAddress();
         } else if (this.addType() === "pagerduty") {
             recipient = new PagerDutyRecipient();
-            recipient.address = this.addPagerDutyEndpoint().name;
+            recipient.endpointName = this.addEndpointName().name;
         }
         let saveRecipient = () => {$.ajax({
             type: "PUT",
