@@ -53,12 +53,12 @@ export class WebHookRecipient extends Recipient {
 }
 
 export class PagerDutyRecipient extends Recipient {
-    endpointName: string;
+    pagerDutyEndpointName: string;
 
     constructor(obj?: any) {
         super(RecipientType.PAGERDUTY);
         if (obj !== undefined) {
-            this.endpointName = obj.endpointName;
+            this.pagerDutyEndpointName = obj.pagerDutyEndpointName;
         }
     }
 }

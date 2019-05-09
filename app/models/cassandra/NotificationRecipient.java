@@ -62,7 +62,7 @@ public interface NotificationRecipient {
         } else if (recipient instanceof PagerDutyNotificationEntry) {
             final PagerDutyNotificationEntry pagerDutyNotificationEntry = (PagerDutyNotificationEntry) recipient;
             final PagerDutyNotificationRecipient notificationRecipient = new PagerDutyNotificationRecipient();
-            notificationRecipient.setEndpointName(pagerDutyNotificationEntry.getEndpointName());
+            notificationRecipient.setPagerDutyEndpointName(pagerDutyNotificationEntry.getPagerDutyEndpointName());
             return notificationRecipient;
         }
         throw new IllegalArgumentException("Unknown recipient type \"" + recipient.getClass().getCanonicalName() + "\"");

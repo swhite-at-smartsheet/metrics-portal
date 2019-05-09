@@ -21,20 +21,20 @@ package models.view;
  * @author Sheldon White (sheldon.white at smartsheet dot com)
  */
 public class PagerDutyNotificationEntry extends NotificationEntry {
-    public String getEndpointName() {
-        return _endpointName;
+    public String getPagerDutyEndpointName() {
+        return _pagerDutyEndpointName;
     }
 
-    public void setEndpointName(final String endpointName) {
-        _endpointName = endpointName;
+    public void setPagerDutyEndpointName(final String pagerDutyEndpointName) {
+        _pagerDutyEndpointName = pagerDutyEndpointName;
     }
 
-    private String _endpointName;
+    private String _pagerDutyEndpointName;
 
     @Override
     public models.internal.NotificationEntry toInternal() {
         return new models.internal.impl.PagerDutyNotificationEntry.Builder()
-                .setEndpointName(_endpointName)
+                .setPagerDutyEndpointName(_pagerDutyEndpointName)
                 .build();
     }
 }
