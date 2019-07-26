@@ -37,7 +37,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 
 /**
- * Internal modle representing a webhook notification entry.
+ * Internal model representing a webhook notification entry.
  *
  * @author Brandon Arp (brandon dot arp at smartsheet dot com)
  */

@@ -20,30 +20,21 @@ import com.arpnetworking.play.configuration.ConfigurationHelper;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.typesafe.config.Config;
-import io.ebean.Ebean;
-import io.ebean.ExpressionList;
-import io.ebean.Junction;
-import io.ebean.PagedList;
-import io.ebean.Query;
-import io.ebean.Transaction;
+import io.ebean.*;
 import models.ebean.NotificationRecipient;
-import models.internal.NotificationEntry;
-import models.internal.NotificationGroup;
-import models.internal.NotificationGroupQuery;
-import models.internal.Organization;
-import models.internal.QueryResult;
+import models.internal.*;
 import models.internal.impl.DefaultNotificationGroupQuery;
 import models.internal.impl.DefaultQueryResult;
 import play.Environment;
 import play.db.ebean.EbeanDynamicEvolutions;
 
+import javax.inject.Inject;
+import javax.persistence.PersistenceException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.inject.Inject;
-import javax.persistence.PersistenceException;
 
 /**
  * Repository for storing notification data in a database.
@@ -240,7 +231,7 @@ public class DatabaseNotificationRepository implements NotificationRepository {
             final NotificationEntry recipient) {
         assertIsOpen();
         LOGGER.debug()
-                .setMessage("Adding recipient to notification group")
+                .setMessage("Removing recipient from notification group")
                 .addData("group", group)
                 .addData("recipient", recipient)
                 .addData("organization", organization)
@@ -291,7 +282,33 @@ public class DatabaseNotificationRepository implements NotificationRepository {
                     .log();
             throw new PersistenceException(e);
         }
+    }
 
+    @Override
+    public void deleteRecipientsMatchingValue(final String value) {
+        assertIsOpen();
+        LOGGER.debug()
+                .setMessage("Deleting all matching recipients")
+                .addData("value", value)
+                .log();
+
+        try (Transaction transaction = Ebean.beginTransaction()) {
+            List<NotificationRecipient> recipients = Ebean.find(models.ebean.NotificationRecipient.class)
+                    .where()
+                    .eq("value", value) // This is an unindexed query, but the consequences seem low.
+                    .findList();
+            Ebean.deleteAll(recipients);
+            transaction.commit();
+            // CHECKSTYLE.OFF: IllegalCatchCheck
+        } catch (final RuntimeException e) {
+            // CHECKSTYLE.ON: IllegalCatchCheck
+            LOGGER.error()
+                    .setMessage("Failed to delete matching recipients")
+                    .addData("value", value)
+                    .setThrowable(e)
+                    .log();
+            throw new PersistenceException(e);
+        }
     }
 
     private void assertIsOpen() {

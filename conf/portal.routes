@@ -51,6 +51,12 @@ PUT        /v1/notificationgroup/:id/recipient  controllers.NotificationControll
 DELETE     /v1/notificationgroup/:id/recipient  controllers.NotificationController.removeRecipient(id: String)
 GET        /v1/notification/test           controllers.NotificationController.testNotification(address: String)
 
+# PagerDuty endpoints
+GET        /v1/pagerdutyendpoints/query         controllers.PagerDutyEndpointController.query(contains: String ?= null, limit: java.lang.Integer ?= null, offset: java.lang.Integer ?= null)
+GET        /v1/pagerdutyendpoints/:id           controllers.PagerDutyEndpointController.get(id: String)
+DELETE     /v1/pagerdutyendpoints/:id           controllers.PagerDutyEndpointController.delete(id: String)
+PUT        /v1/pagerdutyendpoints               controllers.PagerDutyEndpointController.addOrUpdate
+
 # Metrics Queries
 POST       /v1/metrics/query                    controllers.MetricsController.query()
 

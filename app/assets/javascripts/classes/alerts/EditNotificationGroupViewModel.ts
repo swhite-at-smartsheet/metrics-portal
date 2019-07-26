@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Smartsheet.com
+ * Copyright 2019 Smartsheet.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {EmailRecipient, NotificationGroup, Recipient, WebHookRecipient} from './NotificationGroup';
+import {EmailRecipient, NotificationGroup, Recipient, WebHookRecipient, PagerDutyRecipient} from './NotificationGroup';
 import ko = require('knockout');
 import $ = require('jquery');
 import uuid = require('../Uuid');
 import csrf from '../Csrf'
-
+import PagerDutyEndpointData = require("../pagerduty/PagerDutyEndpointData");
 
 interface ResponseCallback {
     (response: any[]): void;
@@ -30,10 +30,28 @@ class EditNotificationGroupViewModel {
     recipients = ko.observableArray<Recipient>();
     addType = ko.observable<string>("email");
     addAddress = ko.observable<string>();
+    addPagerDutyEndpointName = ko.observable<PagerDutyEndpointData>();
     initialCreate: boolean;
+
     addRecipientTemplate = ko.computed<string>(() => {
         return "template-add-recipient-" + this.addType();
     });
+
+    pagerDutyEndpointNameAutocompleteOpts: any = {
+        source: {
+            source: (request: string, response: ResponseCallback) => {
+                $.getJSON("v1/pagerdutyendpoints/query", {contains: request, limit: 10}, (result:{data: PagerDutyEndpointData[]}) => {
+                    response(result.data);
+                });
+            },
+            display: "name"
+        },
+        opt: {
+            minLength: 2,
+            delay: 500,
+            strict: true
+        }
+    };
 
     activate(id: string) {
         if (id != null) {
@@ -93,6 +111,9 @@ class EditNotificationGroupViewModel {
         } else if (this.addType() === "webhook") {
             recipient = new WebHookRecipient();
             recipient.address = this.addAddress();
+        } else if (this.addType() === "pagerduty") {
+            recipient = new PagerDutyRecipient();
+            recipient.pagerDutyEndpointName = this.addPagerDutyEndpointName().name;
         }
         let saveRecipient = () => {$.ajax({
             type: "PUT",

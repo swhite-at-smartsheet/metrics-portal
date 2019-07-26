@@ -87,7 +87,7 @@ interface ResponseCallback {
 class EditAlertViewModel {
     id = ko.observable<string>("");
     name = ko.observable<string>("");
-    query = ko.observable<string>("select my_metric group by cluster | avg | threshold threshold=10 operator=GREATER_THAN").extend({ rateLimit: { timeout: 500, method: "notifyWhenChangesStop" } });
+    query = ko.observable<string>("select 'cpu/idle' group by cluster | avg | threshold threshold=11 operator=LESS_THAN").extend({ rateLimit: { timeout: 500, method: "notifyWhenChangesStop" } });
     period = ko.observable<string>("PT1M");
     comment = ko.observable<string>("");
     container: HTMLElement;
@@ -95,6 +95,7 @@ class EditAlertViewModel {
     queryWarnings = ko.observableArray<string>();
     notificationGroup = ko.observable<NotificationGroup>();
     dateRange = ko.observable<any[]>([moment().subtract(2, 'hours'), moment()]);
+
     notificationGroupAutocompleteOpts: any = {
         source: {
             source: (request: string, response: ResponseCallback) => {
@@ -110,6 +111,7 @@ class EditAlertViewModel {
             strict: true
         }
     };
+
     formattedDateRange = ko.computed(() => {
         let range = this.dateRange();
         let start = range[0];
